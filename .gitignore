@@ -1,0 +1,48 @@
+# Build outputs
+build/
+build-*/
+test/build/
+test/build-wsl/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+*.ninja
+.ninja_*
+
+# Qt generated files
+*_autogen/
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+ui_*.h
+
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.o
+*.obj
+*.out
+
+# Local IDE config
+.vscode/
+.idea/
+
+# Database and generated data
+*.db
+*.sqlite
+*.sqlite3
+*.dump
+*.backup
+*.sql.gz
+generated_data/
+*.csv
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
