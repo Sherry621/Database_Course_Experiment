@@ -1,0 +1,80 @@
+[
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\GenealogySystem_autogen\\mocs_compilation.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\build\\GenealogySystem_autogen\\mocs_compilation.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\build\\GenealogySystem_autogen\\mocs_compilation.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\GenealogySystem_autogen\\mocs_compilation.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\main.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\main.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\main.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\main.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\db\\DatabaseManager.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\db\\DatabaseManager.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\db\\DatabaseManager.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\db\\DatabaseManager.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\db\\UserDao.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\db\\UserDao.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\db\\UserDao.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\db\\UserDao.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\db\\GenealogyDao.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\db\\GenealogyDao.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\db\\GenealogyDao.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\db\\GenealogyDao.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\db\\MemberDao.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\db\\MemberDao.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\db\\MemberDao.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\db\\MemberDao.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\db\\RelationDao.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\db\\RelationDao.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\db\\RelationDao.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\db\\RelationDao.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\service\\AuthService.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\service\\AuthService.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\service\\AuthService.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\service\\AuthService.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\service\\DashboardService.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\service\\DashboardService.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\service\\DashboardService.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\service\\DashboardService.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\service\\TreeService.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\service\\TreeService.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\service\\TreeService.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\service\\TreeService.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\ui\\LoginWindow.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\ui\\LoginWindow.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\ui\\LoginWindow.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\ui\\LoginWindow.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\ui\\MainWindow.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\ui\\MainWindow.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\ui\\MainWindow.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\ui\\MainWindow.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\ui\\MemberDialog.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\ui\\MemberDialog.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\ui\\MemberDialog.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\ui\\MemberDialog.cpp.obj"
+}
+]

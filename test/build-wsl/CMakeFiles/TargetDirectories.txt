@@ -1,0 +1,5 @@
+/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build-wsl/CMakeFiles/GenealogySystem.dir
+/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build-wsl/CMakeFiles/edit_cache.dir
+/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build-wsl/CMakeFiles/rebuild_cache.dir
+/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build-wsl/CMakeFiles/GenealogySystem_autogen_timestamp_deps.dir
+/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build-wsl/CMakeFiles/GenealogySystem_autogen.dir
