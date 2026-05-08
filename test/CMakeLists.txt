@@ -18,6 +18,7 @@ set(SOURCES
     service/AuthService.cpp
     service/DashboardService.cpp
     service/TreeService.cpp
+    ui/GenealogyDialog.cpp
     ui/LoginWindow.cpp
     ui/MainWindow.cpp
     ui/MemberDialog.cpp
@@ -36,6 +37,7 @@ set(HEADERS
     service/AuthService.h
     service/DashboardService.h
     service/TreeService.h
+    ui/GenealogyDialog.h
     ui/LoginWindow.h
     ui/MainWindow.h
     ui/MemberDialog.h

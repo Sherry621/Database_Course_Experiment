@@ -124,6 +124,14 @@ build CMakeFiles/GenealogySystem.dir/service/TreeService.cpp.o: CXX_COMPILER__Ge
   OBJECT_DIR = CMakeFiles/GenealogySystem.dir
   OBJECT_FILE_DIR = CMakeFiles/GenealogySystem.dir/service
 
+build CMakeFiles/GenealogySystem.dir/ui/GenealogyDialog.cpp.o: CXX_COMPILER__GenealogySystem_unscanned_ /mnt/c/Users/Sherry$ Peng/OneDrive/桌面/shujuku/test/ui/GenealogyDialog.cpp || cmake_object_order_depends_target_GenealogySystem
+  DEFINES = -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_SQL_LIB -DQT_WIDGETS_LIB
+  DEP_FILE = CMakeFiles/GenealogySystem.dir/ui/GenealogyDialog.cpp.o.d
+  FLAGS = -std=gnu++17 -fPIC
+  INCLUDES = -I"/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build-wsl/GenealogySystem_autogen/include" -I"/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test" -isystem /usr/include/x86_64-linux-gnu/qt6/QtCore -isystem /usr/include/x86_64-linux-gnu/qt6 -isystem /usr/lib/x86_64-linux-gnu/qt6/mkspecs/linux-g++ -isystem /usr/include/x86_64-linux-gnu/qt6/QtWidgets -isystem /usr/include/x86_64-linux-gnu/qt6/QtGui -isystem /usr/include/x86_64-linux-gnu/qt6/QtSql
+  OBJECT_DIR = CMakeFiles/GenealogySystem.dir
+  OBJECT_FILE_DIR = CMakeFiles/GenealogySystem.dir/ui
+
 build CMakeFiles/GenealogySystem.dir/ui/LoginWindow.cpp.o: CXX_COMPILER__GenealogySystem_unscanned_ /mnt/c/Users/Sherry$ Peng/OneDrive/桌面/shujuku/test/ui/LoginWindow.cpp || cmake_object_order_depends_target_GenealogySystem
   DEFINES = -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DQT_SQL_LIB -DQT_WIDGETS_LIB
   DEP_FILE = CMakeFiles/GenealogySystem.dir/ui/LoginWindow.cpp.o.d
@@ -156,7 +164,7 @@ build CMakeFiles/GenealogySystem.dir/ui/MemberDialog.cpp.o: CXX_COMPILER__Geneal
 #############################################
 # Link the executable GenealogySystem
 
-build GenealogySystem: CXX_EXECUTABLE_LINKER__GenealogySystem_ CMakeFiles/GenealogySystem.dir/GenealogySystem_autogen/mocs_compilation.cpp.o CMakeFiles/GenealogySystem.dir/main.cpp.o CMakeFiles/GenealogySystem.dir/db/DatabaseManager.cpp.o CMakeFiles/GenealogySystem.dir/db/UserDao.cpp.o CMakeFiles/GenealogySystem.dir/db/GenealogyDao.cpp.o CMakeFiles/GenealogySystem.dir/db/MemberDao.cpp.o CMakeFiles/GenealogySystem.dir/db/RelationDao.cpp.o CMakeFiles/GenealogySystem.dir/service/AuthService.cpp.o CMakeFiles/GenealogySystem.dir/service/DashboardService.cpp.o CMakeFiles/GenealogySystem.dir/service/TreeService.cpp.o CMakeFiles/GenealogySystem.dir/ui/LoginWindow.cpp.o CMakeFiles/GenealogySystem.dir/ui/MainWindow.cpp.o CMakeFiles/GenealogySystem.dir/ui/MemberDialog.cpp.o | /usr/lib/x86_64-linux-gnu/libQt6Widgets.so.6.4.2 /usr/lib/x86_64-linux-gnu/libQt6Sql.so.6.4.2 /usr/lib/x86_64-linux-gnu/libQt6Gui.so.6.4.2 /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so /usr/lib/x86_64-linux-gnu/libQt6Core.so.6.4.2 || GenealogySystem_autogen GenealogySystem_autogen_timestamp_deps
+build GenealogySystem: CXX_EXECUTABLE_LINKER__GenealogySystem_ CMakeFiles/GenealogySystem.dir/GenealogySystem_autogen/mocs_compilation.cpp.o CMakeFiles/GenealogySystem.dir/main.cpp.o CMakeFiles/GenealogySystem.dir/db/DatabaseManager.cpp.o CMakeFiles/GenealogySystem.dir/db/UserDao.cpp.o CMakeFiles/GenealogySystem.dir/db/GenealogyDao.cpp.o CMakeFiles/GenealogySystem.dir/db/MemberDao.cpp.o CMakeFiles/GenealogySystem.dir/db/RelationDao.cpp.o CMakeFiles/GenealogySystem.dir/service/AuthService.cpp.o CMakeFiles/GenealogySystem.dir/service/DashboardService.cpp.o CMakeFiles/GenealogySystem.dir/service/TreeService.cpp.o CMakeFiles/GenealogySystem.dir/ui/GenealogyDialog.cpp.o CMakeFiles/GenealogySystem.dir/ui/LoginWindow.cpp.o CMakeFiles/GenealogySystem.dir/ui/MainWindow.cpp.o CMakeFiles/GenealogySystem.dir/ui/MemberDialog.cpp.o | /usr/lib/x86_64-linux-gnu/libQt6Widgets.so.6.4.2 /usr/lib/x86_64-linux-gnu/libQt6Sql.so.6.4.2 /usr/lib/x86_64-linux-gnu/libQt6Gui.so.6.4.2 /usr/lib/x86_64-linux-gnu/libGLX.so /usr/lib/x86_64-linux-gnu/libOpenGL.so /usr/lib/x86_64-linux-gnu/libQt6Core.so.6.4.2 || GenealogySystem_autogen GenealogySystem_autogen_timestamp_deps
   LINK_LIBRARIES = /usr/lib/x86_64-linux-gnu/libQt6Widgets.so.6.4.2  /usr/lib/x86_64-linux-gnu/libQt6Sql.so.6.4.2  /usr/lib/x86_64-linux-gnu/libQt6Gui.so.6.4.2  /usr/lib/x86_64-linux-gnu/libGLX.so  /usr/lib/x86_64-linux-gnu/libOpenGL.so  /usr/lib/x86_64-linux-gnu/libQt6Core.so.6.4.2
   OBJECT_DIR = CMakeFiles/GenealogySystem.dir
   POST_BUILD = :

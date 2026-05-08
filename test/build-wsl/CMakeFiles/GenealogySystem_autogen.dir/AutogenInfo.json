@@ -255,6 +255,12 @@
 			null
 		],
 		[
+			"/mnt/c/Users/Sherry Peng/OneDrive/\u684c\u9762/shujuku/test/ui/GenealogyDialog.h",
+			"Mu",
+			"UYX5XTB5RZ/moc_GenealogyDialog.cpp",
+			null
+		],
+		[
 			"/mnt/c/Users/Sherry Peng/OneDrive/\u684c\u9762/shujuku/test/ui/LoginWindow.h",
 			"Mu",
 			"UYX5XTB5RZ/moc_LoginWindow.cpp",
@@ -382,6 +388,11 @@
 		],
 		[
 			"/mnt/c/Users/Sherry Peng/OneDrive/\u684c\u9762/shujuku/test/service/TreeService.cpp",
+			"Mu",
+			null
+		],
+		[
+			"/mnt/c/Users/Sherry Peng/OneDrive/\u684c\u9762/shujuku/test/ui/GenealogyDialog.cpp",
 			"Mu",
 			null
 		],
