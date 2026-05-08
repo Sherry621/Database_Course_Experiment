@@ -23,8 +23,8 @@ CMAKE_AR:FILEPATH=D:/Qt/Tools/mingw1310_64/bin/ar.exe
 //No help, variable specified on the command line.
 CMAKE_BUILD_TYPE:STRING=Debug
 
-//CXX compiler
-CMAKE_CXX_COMPILER:STRING=d:/Qt/Tools/mingw1310_64/bin/g++.exe
+//No help, variable specified on the command line.
+CMAKE_CXX_COMPILER:FILEPATH=d:/Qt/Tools/mingw1310_64/bin/g++.exe
 
 //A wrapper around 'ar' adding the appropriate '--plugin' option
 // for the GCC compiler
@@ -263,8 +263,8 @@ CMAKE_STRIP:FILEPATH=D:/Qt/Tools/mingw1310_64/bin/strip.exe
 //Path to a program.
 CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 
-//The CMake toolchain file
-CMAKE_TOOLCHAIN_FILE:FILEPATH=D:/Qt/6.11.0/mingw_64/lib/cmake/Qt6/qt.toolchain.cmake
+//No help, variable specified on the command line.
+CMAKE_TOOLCHAIN_FILE:FILEPATH=d:/Qt/6.11.0/mingw_64/lib/cmake/Qt6/qt.toolchain.cmake
 
 //If this value is on, makefiles will be generated without the
 // .SILENT directive, and all commands will be echoed to the console

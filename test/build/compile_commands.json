@@ -61,6 +61,12 @@
 },
 {
   "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
+  "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\ui\\GenealogyDialog.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\ui\\GenealogyDialog.cpp\"",
+  "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\ui\\GenealogyDialog.cpp",
+  "output": "CMakeFiles\\GenealogySystem.dir\\ui\\GenealogyDialog.cpp.obj"
+},
+{
+  "directory": "C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build",
   "command": "d:\\Qt\\Tools\\mingw1310_64\\bin\\g++.exe -DMINGW_HAS_SECURE_API=1 -DQT_CORE_LIB -DQT_GUI_LIB -DQT_SQL_LIB -DQT_WIDGETS_LIB -DUNICODE -DWIN32 -DWIN64 -D_ENABLE_EXTENDED_ALIGNED_STORAGE -D_UNICODE -D_WIN64 -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test/build/GenealogySystem_autogen/include\" -I\"C:/Users/Sherry Peng/OneDrive/桌面/shujuku/test\" -isystem D:/Qt/6.11.0/mingw_64/include/QtCore -isystem D:/Qt/6.11.0/mingw_64/include -isystem D:/Qt/6.11.0/mingw_64/mkspecs/win32-g++ -isystem D:/Qt/6.11.0/mingw_64/include/QtWidgets -isystem D:/Qt/6.11.0/mingw_64/include/QtGui -isystem D:/Qt/6.11.0/mingw_64/include/QtSql -DQT_QML_DEBUG -DQT_DECLARATIVE_DEBUG -g -std=gnu++17 -o CMakeFiles\\GenealogySystem.dir\\ui\\LoginWindow.cpp.obj -c \"C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\ui\\LoginWindow.cpp\"",
   "file": "C:\\Users\\Sherry Peng\\OneDrive\\桌面\\shujuku\\test\\ui\\LoginWindow.cpp",
   "output": "CMakeFiles\\GenealogySystem.dir\\ui\\LoginWindow.cpp.obj"

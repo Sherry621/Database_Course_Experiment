@@ -10,7 +10,17 @@
 MemberDialog::MemberDialog(int genealogyId, QWidget* parent)
     : QDialog(parent), genealogyId_(genealogyId) {
     setWindowTitle("新增成员");
+    buildUi();
+}
 
+MemberDialog::MemberDialog(const Member& member, QWidget* parent)
+    : QDialog(parent), memberId_(member.memberId), genealogyId_(member.genealogyId) {
+    setWindowTitle("编辑成员");
+    buildUi();
+    fillMember(member);
+}
+
+void MemberDialog::buildUi() {
     nameEdit_ = new QLineEdit(this);
     genderCombo_ = new QComboBox(this);
     genderCombo_->addItem("男", "M");
@@ -37,8 +47,18 @@ MemberDialog::MemberDialog(int genealogyId, QWidget* parent)
     layout->addWidget(buttons);
 }
 
+void MemberDialog::fillMember(const Member& member) {
+    nameEdit_->setText(member.name);
+    genderCombo_->setCurrentIndex(member.gender == 'F' ? 1 : 0);
+    birthYearEdit_->setText(member.birthYear == 0 ? QString() : QString::number(member.birthYear));
+    deathYearEdit_->setText(member.deathYear == 0 ? QString() : QString::number(member.deathYear));
+    generationEdit_->setText(member.generation == 0 ? QString() : QString::number(member.generation));
+    biographyEdit_->setPlainText(member.biography);
+}
+
 Member MemberDialog::member() const {
     Member member;
+    member.memberId = memberId_;
     member.genealogyId = genealogyId_;
     member.name = nameEdit_->text().trimmed();
     member.gender = genderCombo_->currentData().toString().at(0);

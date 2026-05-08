@@ -13,10 +13,15 @@ class MemberDialog : public QDialog {
 
 public:
     explicit MemberDialog(int genealogyId, QWidget* parent = nullptr);
+    explicit MemberDialog(const Member& member, QWidget* parent = nullptr);
 
     Member member() const;
 
 private:
+    void buildUi();
+    void fillMember(const Member& member);
+
+    int memberId_ = 0;
     int genealogyId_ = 0;
     QLineEdit* nameEdit_ = nullptr;
     QComboBox* genderCombo_ = nullptr;
