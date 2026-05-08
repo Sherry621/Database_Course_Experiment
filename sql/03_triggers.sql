@@ -5,14 +5,17 @@ DECLARE
     child_genealogy INT;
     parent_birth INT;
     child_birth INT;
+    parent_gender CHAR(1);
+    parent_generation INT;
+    child_generation INT;
 BEGIN
-    SELECT genealogy_id, birth_year
-    INTO parent_genealogy, parent_birth
+    SELECT genealogy_id, birth_year, gender, generation
+    INTO parent_genealogy, parent_birth, parent_gender, parent_generation
     FROM members
     WHERE member_id = NEW.parent_id;
 
-    SELECT genealogy_id, birth_year
-    INTO child_genealogy, child_birth
+    SELECT genealogy_id, birth_year, generation
+    INTO child_genealogy, child_birth, child_generation
     FROM members
     WHERE member_id = NEW.child_id;
 
@@ -20,8 +23,21 @@ BEGIN
         RAISE EXCEPTION '亲子关系双方必须属于同一个族谱';
     END IF;
 
+    IF NEW.relation_type = 'father' AND parent_gender <> 'M' THEN
+        RAISE EXCEPTION '父亲关系要求父节点性别为男性';
+    END IF;
+
+    IF NEW.relation_type = 'mother' AND parent_gender <> 'F' THEN
+        RAISE EXCEPTION '母亲关系要求父节点性别为女性';
+    END IF;
+
     IF parent_birth IS NOT NULL AND child_birth IS NOT NULL AND parent_birth >= child_birth THEN
         RAISE EXCEPTION '父母出生年份必须早于子女出生年份';
+    END IF;
+
+    IF parent_generation IS NOT NULL AND child_generation IS NOT NULL
+       AND parent_generation >= child_generation THEN
+        RAISE EXCEPTION '父母辈分必须早于子女辈分';
     END IF;
 
     RETURN NEW;
