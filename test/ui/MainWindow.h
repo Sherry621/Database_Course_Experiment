@@ -54,7 +54,7 @@ private:
     QWidget* buildRelationPage();
     int currentGenealogyId() const;
     int selectedMemberId() const;
-    void appendTreeChildren(QTreeWidgetItem* parentItem, int memberId);
+    void appendTreeChildren(QTreeWidgetItem* parentItem, int memberId, int depth, int maxDepth);
 
     User user_;
     GenealogyDao genealogyDao_;
@@ -80,6 +80,7 @@ private:
     QLineEdit* divorceYearEdit_ = nullptr;
     QLineEdit* marriageDescriptionEdit_ = nullptr;
     QLineEdit* treeRootEdit_ = nullptr;
+    QLineEdit* treeDepthEdit_ = nullptr;
     QLineEdit* ancestorMemberEdit_ = nullptr;
     QTreeWidget* ancestorTree_ = nullptr;
     QLineEdit* relationAEdit_ = nullptr;

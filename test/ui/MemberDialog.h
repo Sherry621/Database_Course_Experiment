@@ -17,6 +17,9 @@ public:
 
     Member member() const;
 
+protected:
+    void accept() override;
+
 private:
     void buildUi();
     void fillMember(const Member& member);

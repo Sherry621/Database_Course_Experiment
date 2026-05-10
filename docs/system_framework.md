@@ -66,5 +66,6 @@ PostgreSQL 层
 2. 插入少量用户、族谱、成员、亲子关系测试数据。
 3. 编译运行 `test/` 下 Qt 项目，验证登录和数据库连接。
 4. 补充族谱管理、成员编辑删除、亲子关系维护、婚姻关系维护界面。
-5. 编写 10 万级 CSV 数据生成工具与 `COPY` 导入脚本。
-6. 截图整理 EXPLAIN ANALYZE 性能对比，用于课程报告。
+5. 基于 `tools/generate_data.py` 生成 10 万级 CSV，并使用 `sql/08_load_generated_csv.sql` 执行 `COPY` 导入。
+6. 使用 `sql/09_export_branch.sql` 导出分支备份。
+7. 使用 `sql/10_performance_explain.sql` 截图整理 EXPLAIN ANALYZE 性能对比，用于课程报告。

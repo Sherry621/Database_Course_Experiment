@@ -96,9 +96,10 @@ psql 可以 SELECT 到用户、族谱、成员。
 
 ```bash
 cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test"
-cmake -S . -B build-wsl -G Ninja
-cmake --build build-wsl
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build-wsl/GenealogySystem
+cmake -S . -B build -G Ninja
+cmake --build build
+env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
+./build/Stage2Smoke
 ```
 
 重点检查：
@@ -115,6 +116,8 @@ Dashboard 是否能显示人数和关系数量。
 ## 5. 阶段三：补齐基础 CRUD
 
 目标：完成 PPT 中“族谱、成员管理增删改查”和“邀请协作”。
+
+当前状态：族谱新增、编辑、删除，成员新增、编辑、删除、详情，协作者邀请，亲子关系维护和婚姻关系维护已经具备基础界面。后续阶段三主要做权限细化、输入校验、错误提示和演示体验打磨。
 
 优先级：
 

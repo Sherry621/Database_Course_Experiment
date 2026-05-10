@@ -8,7 +8,7 @@
 系统：Windows 11 + WSL2 Ubuntu
 界面：Qt6 Widgets
 输入法：fcitx5 + pinyin
-程序：test/build-wsl/GenealogySystem
+程序：test/build/GenealogySystem
 ```
 
 ## 1. 问题表现
@@ -64,7 +64,7 @@ test/setup_fcitx_wsl.sh
 执行：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
+cd "Database_Course_Experiment/test"
 chmod +x setup_fcitx_wsl.sh run_wsl.sh
 ./setup_fcitx_wsl.sh
 ```
@@ -151,14 +151,14 @@ pgrep -a fcitx5
 不要直接运行：
 
 ```bash
-./build-wsl/GenealogySystem
+./build/GenealogySystem
 ```
 
 应该使用项目提供的启动脚本：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
-cmake --build build-wsl
+cd "Database_Course_Experiment/test"
+cmake --build build
 ./run_wsl.sh
 ```
 
@@ -204,7 +204,7 @@ QT_IM_MODULE=fcitx \
 XMODIFIERS=@im=fcitx \
 GTK_IM_MODULE=fcitx \
 XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir \
-./build-wsl/GenealogySystem
+./build/GenealogySystem
 ```
 
 ## 9. 诊断命令
@@ -240,7 +240,7 @@ cd & 'C:\Users\Sherry Peng\OneDrive\桌面\shujuku'
 WSL 正确写法：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
+cd "Database_Course_Experiment/test"
 ```
 
 ### 10.2 profile 被 fcitx5 覆盖回 keyboard-us

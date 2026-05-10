@@ -55,7 +55,18 @@ RETURNS TRIGGER AS $$
 DECLARE
     p1_genealogy INT;
     p2_genealogy INT;
+    tmp_person_id INT;
 BEGIN
+    IF NEW.person1_id = NEW.person2_id THEN
+        RAISE EXCEPTION '婚姻关系双方不能是同一个人';
+    END IF;
+
+    IF NEW.person1_id > NEW.person2_id THEN
+        tmp_person_id := NEW.person1_id;
+        NEW.person1_id := NEW.person2_id;
+        NEW.person2_id := tmp_person_id;
+    END IF;
+
     SELECT genealogy_id INTO p1_genealogy FROM members WHERE member_id = NEW.person1_id;
     SELECT genealogy_id INTO p2_genealogy FROM members WHERE member_id = NEW.person2_id;
 

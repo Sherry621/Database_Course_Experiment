@@ -17,4 +17,9 @@ fi
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/mnt/wslg/runtime-dir}"
 
-exec ./build-wsl/GenealogySystem
+if [[ ! -x ./build/GenealogySystem ]]; then
+  echo "Missing ./build/GenealogySystem. Run: cmake -S . -B build -G Ninja && cmake --build build" >&2
+  exit 1
+fi
+
+exec ./build/GenealogySystem

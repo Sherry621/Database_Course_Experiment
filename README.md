@@ -25,20 +25,24 @@
 - 成员列表展示
 - 成员姓名模糊查询
 - 新增成员
+- 族谱新增、编辑、删除
+- 邀请协作者
+- 成员编辑、删除和详情查看
+- 亲子关系维护
+- 婚姻关系维护
 - 后代树形预览
 - 祖先递归查询
 - 两个成员之间亲缘链路 BFS 查询
 - 数据库建表、索引、触发器和核心查询 SQL
+- 10 万级模拟数据生成工具
+- COPY 批量导入脚本
+- 分支导出脚本
+- EXPLAIN ANALYZE 性能测试脚本
 
 待继续完善：
 
-- 族谱新增、编辑、删除界面
-- 成员编辑、删除界面
-- 亲子关系维护界面
-- 婚姻关系维护界面
-- 10 万级模拟数据生成工具
-- 数据导入导出脚本
-- EXPLAIN ANALYZE 性能测试截图整理
+- ER 图、关系模型、3NF/BCNF 分析
+- 实验报告截图与最终演示材料整理
 
 ## 目录结构
 
@@ -94,6 +98,10 @@
 - `sql/02_indexes.sql`：索引脚本
 - `sql/03_triggers.sql`：触发器脚本
 - `sql/04_core_queries.sql`：课程要求核心查询
+- `sql/08_load_generated_csv.sql`：10 万级 CSV 批量导入
+- `sql/09_export_branch.sql`：分支导出备份
+- `sql/10_performance_explain.sql`：索引性能对比 EXPLAIN
+- `tools/generate_data.py`：模拟数据生成工具
 
 ## 环境准备
 
@@ -143,7 +151,7 @@ CREATE DATABASE genealogy_lab OWNER genealogy_user;
 执行初始化脚本：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
+cd "Database_Course_Experiment"
 
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/01_schema.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/02_indexes.sql
@@ -182,20 +190,20 @@ VALUES ('张氏族谱', '张', 1, '测试族谱');
 进入 Qt 项目目录：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
+cd "Database_Course_Experiment/test"
 ```
 
-使用 WSL 独立构建目录：
+使用当前项目下的 `build/` 构建目录：
 
 ```bash
-cmake -S . -B build-wsl -G Ninja
-cmake --build build-wsl
+cmake -S . -B build -G Ninja
+cmake --build build
 ```
 
 运行程序：
 
 ```bash
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build-wsl/GenealogySystem
+env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
 ```
 
 登录：
@@ -212,8 +220,8 @@ env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build-wsl/Ge
 如果出现 Windows 路径和 WSL 路径冲突，不要共用 `build/` 目录。WSL 下使用：
 
 ```bash
-cmake -S . -B build-wsl -G Ninja
-cmake --build build-wsl
+cmake -S . -B build -G Ninja
+cmake --build build
 ```
 
 ### 中文显示为方框
@@ -230,7 +238,7 @@ fc-cache -fv
 推荐使用：
 
 ```bash
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build-wsl/GenealogySystem
+env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
 ```
 
 ## 文档索引

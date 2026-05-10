@@ -1,5 +1,7 @@
 #include "RelationDao.h"
 
+#include <algorithm>
+
 #include <QSqlQuery>
 #include <QString>
 #include <QVariant>
@@ -43,13 +45,19 @@ bool RelationDao::addMarriage(int genealogyId,
                               int marriageYear,
                               int divorceYear,
                               const QString& description) const {
+    if (person1Id == person2Id) {
+        return false;
+    }
+
+    const auto [leftPersonId, rightPersonId] = std::minmax(person1Id, person2Id);
+
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "INSERT INTO marriages(genealogy_id, person1_id, person2_id, marriage_year, divorce_year, description) "
         "VALUES(:genealogy_id, :person1_id, :person2_id, :marriage_year, :divorce_year, :description)");
     query.bindValue(":genealogy_id", genealogyId);
-    query.bindValue(":person1_id", person1Id);
-    query.bindValue(":person2_id", person2Id);
+    query.bindValue(":person1_id", leftPersonId);
+    query.bindValue(":person2_id", rightPersonId);
     query.bindValue(":marriage_year", marriageYear == 0 ? QVariant() : QVariant(marriageYear));
     query.bindValue(":divorce_year", divorceYear == 0 ? QVariant() : QVariant(divorceYear));
     query.bindValue(":description", description);

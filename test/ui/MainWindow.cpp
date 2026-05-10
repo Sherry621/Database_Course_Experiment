@@ -19,8 +19,41 @@
 #include "ui/MemberDialog.h"
 
 namespace {
+bool parsePositiveInt(const QLineEdit* edit, const QString& fieldName, int& value, QString& error) {
+    bool ok = false;
+    value = edit->text().trimmed().toInt(&ok);
+    if (!ok || value <= 0) {
+        error = fieldName + "必须是大于 0 的整数。";
+        return false;
+    }
+    return true;
+}
+
+bool parseOptionalYear(const QLineEdit* edit, const QString& fieldName, int& value, QString& error) {
+    const QString text = edit->text().trimmed();
+    if (text.isEmpty()) {
+        value = 0;
+        return true;
+    }
+
+    bool ok = false;
+    value = text.toInt(&ok);
+    if (!ok || value < 0) {
+        error = fieldName + "必须是非负整数，或者留空。";
+        return false;
+    }
+    return true;
+}
+
 QString genderText(QChar gender) {
     return gender == 'F' ? "女" : "男";
+}
+
+QString memberLabel(const std::optional<Member>& member, int memberId) {
+    if (!member.has_value()) {
+        return QString("#%1").arg(memberId);
+    }
+    return QString("%1(#%2)").arg(member->name).arg(member->memberId);
 }
 }
 
@@ -200,12 +233,15 @@ QWidget* MainWindow::buildTreePage() {
     auto* page = new QWidget(this);
     treeRootEdit_ = new QLineEdit(page);
     treeRootEdit_->setPlaceholderText("根成员 ID");
+    treeDepthEdit_ = new QLineEdit(page);
+    treeDepthEdit_->setPlaceholderText("最大显示层数，默认 5");
 
     auto* buildButton = new QPushButton("生成后代树", page);
     connect(buildButton, &QPushButton::clicked, this, &MainWindow::buildTreePreview);
 
     auto* toolbar = new QHBoxLayout();
     toolbar->addWidget(treeRootEdit_);
+    toolbar->addWidget(treeDepthEdit_);
     toolbar->addWidget(buildButton);
 
     treeWidget_ = new QTreeWidget(page);
@@ -447,9 +483,28 @@ void MainWindow::showMemberDetail() {
 }
 
 void MainWindow::addParentChildRelation() {
+    if (currentGenealogyId() == 0) {
+        QMessageBox::warning(this, "添加失败", "请先选择族谱。");
+        return;
+    }
+
+    QString error;
+    int parentId = 0;
+    int childId = 0;
+    if (!parsePositiveInt(parentIdEdit_, "父/母成员 ID", parentId, error) ||
+        !parsePositiveInt(childIdEdit_, "子女成员 ID", childId, error)) {
+        QMessageBox::warning(this, "输入错误", error);
+        return;
+    }
+
+    if (parentId == childId) {
+        QMessageBox::warning(this, "输入错误", "父母成员和子女成员不能是同一个人。");
+        return;
+    }
+
     if (!relationDao_.addParentChild(currentGenealogyId(),
-                                     parentIdEdit_->text().toInt(),
-                                     childIdEdit_->text().toInt(),
+                                     parentId,
+                                     childId,
                                      parentTypeCombo_->currentData().toString())) {
         QMessageBox::warning(this, "添加失败", "请检查成员 ID、族谱归属、出生年份和父母唯一性约束。");
         return;
@@ -460,11 +515,39 @@ void MainWindow::addParentChildRelation() {
 }
 
 void MainWindow::addMarriageRelation() {
+    if (currentGenealogyId() == 0) {
+        QMessageBox::warning(this, "添加失败", "请先选择族谱。");
+        return;
+    }
+
+    QString error;
+    int spouseAId = 0;
+    int spouseBId = 0;
+    int marriageYear = 0;
+    int divorceYear = 0;
+    if (!parsePositiveInt(spouseAEdit_, "成员 A ID", spouseAId, error) ||
+        !parsePositiveInt(spouseBEdit_, "成员 B ID", spouseBId, error) ||
+        !parseOptionalYear(marriageYearEdit_, "结婚年份", marriageYear, error) ||
+        !parseOptionalYear(divorceYearEdit_, "离婚年份", divorceYear, error)) {
+        QMessageBox::warning(this, "输入错误", error);
+        return;
+    }
+
+    if (spouseAId == spouseBId) {
+        QMessageBox::warning(this, "输入错误", "婚姻关系双方不能是同一个人。");
+        return;
+    }
+
+    if (marriageYear > 0 && divorceYear > 0 && divorceYear < marriageYear) {
+        QMessageBox::warning(this, "输入错误", "离婚年份不能早于结婚年份。");
+        return;
+    }
+
     if (!relationDao_.addMarriage(currentGenealogyId(),
-                                  spouseAEdit_->text().toInt(),
-                                  spouseBEdit_->text().toInt(),
-                                  marriageYearEdit_->text().toInt(),
-                                  divorceYearEdit_->text().toInt(),
+                                  spouseAId,
+                                  spouseBId,
+                                  marriageYear,
+                                  divorceYear,
                                   marriageDescriptionEdit_->text().trimmed())) {
         QMessageBox::warning(this, "添加失败", "请检查成员 ID、族谱归属和婚姻年份。");
         return;
@@ -476,7 +559,20 @@ void MainWindow::addMarriageRelation() {
 
 void MainWindow::buildTreePreview() {
     treeWidget_->clear();
-    const int rootId = treeRootEdit_->text().toInt();
+    QString error;
+    int rootId = 0;
+    if (!parsePositiveInt(treeRootEdit_, "根成员 ID", rootId, error)) {
+        QMessageBox::warning(this, "输入错误", error);
+        return;
+    }
+
+    int maxDepth = 5;
+    if (!treeDepthEdit_->text().trimmed().isEmpty() &&
+        !parsePositiveInt(treeDepthEdit_, "最大显示层数", maxDepth, error)) {
+        QMessageBox::warning(this, "输入错误", error);
+        return;
+    }
+
     const auto root = memberDao_.findById(rootId);
     if (!root.has_value()) {
         QMessageBox::warning(this, "查询失败", "未找到根成员。");
@@ -485,23 +581,39 @@ void MainWindow::buildTreePreview() {
 
     auto* rootItem = new QTreeWidgetItem(QStringList(root->name + QString(" ID:%1").arg(root->memberId)));
     treeWidget_->addTopLevelItem(rootItem);
-    appendTreeChildren(rootItem, rootId);
+    appendTreeChildren(rootItem, rootId, 0, maxDepth);
     treeWidget_->expandAll();
 }
 
 void MainWindow::queryAncestors() {
     ancestorTree_->clear();
-    for (const auto& ancestor : treeService_.getAncestors(ancestorMemberEdit_->text().toInt())) {
+    QString error;
+    int memberId = 0;
+    if (!parsePositiveInt(ancestorMemberEdit_, "成员 ID", memberId, error)) {
+        QMessageBox::warning(this, "输入错误", error);
+        return;
+    }
+
+    for (const auto& ancestor : treeService_.getAncestors(memberId)) {
         ancestorTree_->addTopLevelItem(new QTreeWidgetItem(QStringList(
             QString("第%1代 %2 ID:%3").arg(ancestor.generation).arg(ancestor.name).arg(ancestor.memberId))));
     }
 }
 
 void MainWindow::queryRelationPath() {
+    QString error;
+    int memberA = 0;
+    int memberB = 0;
+    if (!parsePositiveInt(relationAEdit_, "成员 A ID", memberA, error) ||
+        !parsePositiveInt(relationBEdit_, "成员 B ID", memberB, error)) {
+        QMessageBox::warning(this, "输入错误", error);
+        return;
+    }
+
     const auto path = treeService_.findRelationPath(
         currentGenealogyId(),
-        relationAEdit_->text().toInt(),
-        relationBEdit_->text().toInt());
+        memberA,
+        memberB);
 
     if (path.empty()) {
         relationResultLabel_->setText("未找到亲缘链路。");
@@ -510,7 +622,7 @@ void MainWindow::queryRelationPath() {
 
     QStringList parts;
     for (int memberId : path) {
-        parts << QString::number(memberId);
+        parts << memberLabel(memberDao_.findById(memberId), memberId);
     }
     relationResultLabel_->setText("存在亲缘链路：\n" + parts.join(" -> "));
 }
@@ -526,11 +638,18 @@ int MainWindow::selectedMemberId() const {
     return memberTable_->item(memberTable_->currentRow(), 0)->text().toInt();
 }
 
-void MainWindow::appendTreeChildren(QTreeWidgetItem* parentItem, int memberId) {
+void MainWindow::appendTreeChildren(QTreeWidgetItem* parentItem, int memberId, int depth, int maxDepth) {
+    if (depth >= maxDepth) {
+        if (!treeService_.getChildren(memberId).empty()) {
+            parentItem->addChild(new QTreeWidgetItem(QStringList("... 已达到显示层数限制")));
+        }
+        return;
+    }
+
     for (const auto& child : treeService_.getChildren(memberId)) {
         auto* item = new QTreeWidgetItem(QStringList(
             QString("%1 ID:%2 第%3代").arg(child.name).arg(child.memberId).arg(child.generation)));
         parentItem->addChild(item);
-        appendTreeChildren(item, child.memberId);
+        appendTreeChildren(item, child.memberId, depth + 1, maxDepth);
     }
 }

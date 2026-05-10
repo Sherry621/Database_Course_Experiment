@@ -168,7 +168,7 @@ test/ui/
 
 ```text
 test/build/
-test/build-wsl/
+test/build/
 ```
 
 这些是本地构建产物，不属于源码。
