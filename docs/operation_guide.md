@@ -231,6 +231,20 @@ fc-cache -fv
 
 程序入口 `main.cpp` 已经设置了中文字体 fallback。
 
+如果中文可以显示但不能输入，请参考：
+
+```text
+docs/fcitx_pinyin_guide.md
+```
+
+推荐运行方式：
+
+```bash
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
+./setup_fcitx_wsl.sh
+./run_wsl.sh
+```
+
 ### 8.3 QStandardPaths 权限警告
 
 如果看到：

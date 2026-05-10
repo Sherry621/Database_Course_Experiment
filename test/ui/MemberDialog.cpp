@@ -29,6 +29,8 @@ void MemberDialog::buildUi() {
     deathYearEdit_ = new QLineEdit(this);
     generationEdit_ = new QLineEdit(this);
     biographyEdit_ = new QTextEdit(this);
+    nameEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
+    biographyEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
 
     auto* form = new QFormLayout();
     form->addRow("姓名", nameEdit_);

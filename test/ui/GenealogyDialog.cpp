@@ -27,6 +27,9 @@ void GenealogyDialog::buildUi() {
     revisionDateEdit_ = new QDateEdit(QDate::currentDate(), this);
     revisionDateEdit_->setCalendarPopup(true);
     descriptionEdit_ = new QTextEdit(this);
+    titleEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
+    surnameEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
+    descriptionEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
 
     auto* form = new QFormLayout();
     form->addRow("谱名", titleEdit_);

@@ -18,6 +18,12 @@
 #include "ui/GenealogyDialog.h"
 #include "ui/MemberDialog.h"
 
+namespace {
+QString genderText(QChar gender) {
+    return gender == 'F' ? "女" : "男";
+}
+}
+
 MainWindow::MainWindow(const User& user, QWidget* parent) : QMainWindow(parent), user_(user) {
     buildUi();
     reloadGenealogies();
@@ -110,6 +116,7 @@ QWidget* MainWindow::buildMemberPage() {
     auto* page = new QWidget(this);
     memberSearchEdit_ = new QLineEdit(page);
     memberSearchEdit_->setPlaceholderText("姓名关键词");
+    memberSearchEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
 
     auto* searchButton = new QPushButton("搜索", page);
     auto* addButton = new QPushButton("新增成员", page);
@@ -166,6 +173,7 @@ QWidget* MainWindow::buildRelationManagePage() {
     marriageYearEdit_ = new QLineEdit(page);
     divorceYearEdit_ = new QLineEdit(page);
     marriageDescriptionEdit_ = new QLineEdit(page);
+    marriageDescriptionEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
 
     auto* addMarriageButton = new QPushButton("添加婚姻关系", page);
     connect(addMarriageButton, &QPushButton::clicked, this, &MainWindow::addMarriageRelation);
@@ -366,7 +374,7 @@ void MainWindow::reloadMembers() {
         const auto& member = members[row];
         memberTable_->setItem(row, 0, new QTableWidgetItem(QString::number(member.memberId)));
         memberTable_->setItem(row, 1, new QTableWidgetItem(member.name));
-        memberTable_->setItem(row, 2, new QTableWidgetItem(QString(member.gender)));
+        memberTable_->setItem(row, 2, new QTableWidgetItem(genderText(member.gender)));
         memberTable_->setItem(row, 3, new QTableWidgetItem(QString::number(member.birthYear)));
         memberTable_->setItem(row, 4, new QTableWidgetItem(QString::number(member.deathYear)));
         memberTable_->setItem(row, 5, new QTableWidgetItem(QString::number(member.generation)));
@@ -431,7 +439,7 @@ void MainWindow::showMemberDetail() {
         "ID：%1\n姓名：%2\n性别：%3\n出生年：%4\n死亡年：%5\n代数：%6\n生平简介：%7")
         .arg(member->memberId)
         .arg(member->name)
-        .arg(member->gender)
+        .arg(genderText(member->gender))
         .arg(member->birthYear)
         .arg(member->deathYear)
         .arg(member->generation)

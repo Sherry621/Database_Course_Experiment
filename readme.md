@@ -2022,3 +2022,11 @@ EXPLAIN 性能对比
 ```
 
 如果你后续要真正开始写代码，建议先从 **数据库 SQL 脚本 + Qt 登录窗口 + 成员管理界面** 三部分开始，因为这三部分最容易形成可演示成果。
+
+
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
+
+cmake -S . -B build-wsl -G Ninja
+cmake --build build-wsl
+./build-wsl/GenealogySystem
+./run_wsl.sh

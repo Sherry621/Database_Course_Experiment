@@ -20,6 +20,8 @@ void LoginWindow::buildUi() {
 
     usernameEdit_ = new QLineEdit(this);
     passwordEdit_ = new QLineEdit(this);
+    usernameEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
+    passwordEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
     passwordEdit_->setEchoMode(QLineEdit::Password);
 
     auto* formLayout = new QFormLayout();

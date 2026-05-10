@@ -41,6 +41,12 @@ docs/operation_guide.md
 实际运行操作文档，记录数据库初始化、编译运行、登录测试和常见问题处理。
 
 ```text
+docs/fcitx_pinyin_guide.md
+```
+
+WSL2 + Qt6 中文拼音输入法配置说明。
+
+```text
 docs/project_structure.md
 ```
 
