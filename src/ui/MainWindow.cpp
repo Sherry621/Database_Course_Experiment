@@ -353,7 +353,11 @@ void MainWindow::reloadDashboard() {
 
 void MainWindow::addGenealogy() {
     GenealogyDialog dialog(user_.userId, this);
-    if (dialog.exec() == QDialog::Accepted && genealogyDao_.insert(dialog.genealogy())) {
+    if (dialog.exec() == QDialog::Accepted) {
+        if (!genealogyDao_.insert(dialog.genealogy())) {
+            QMessageBox::warning(this, "新增失败", genealogyDao_.lastError());
+            return;
+        }
         reloadGenealogies();
     }
 }
@@ -366,7 +370,11 @@ void MainWindow::editGenealogy() {
     }
 
     GenealogyDialog dialog(*genealogy, this);
-    if (dialog.exec() == QDialog::Accepted && genealogyDao_.update(dialog.genealogy())) {
+    if (dialog.exec() == QDialog::Accepted) {
+        if (!genealogyDao_.update(dialog.genealogy())) {
+            QMessageBox::warning(this, "编辑失败", genealogyDao_.lastError());
+            return;
+        }
         reloadGenealogies();
     }
 }
@@ -382,7 +390,7 @@ void MainWindow::deleteGenealogy() {
     }
 
     if (!genealogyDao_.remove(currentGenealogyId(), user_.userId)) {
-        QMessageBox::warning(this, "删除失败", "只有族谱创建者可以删除族谱。");
+        QMessageBox::warning(this, "删除失败", genealogyDao_.lastError());
         return;
     }
     reloadGenealogies();
@@ -396,7 +404,7 @@ void MainWindow::inviteCollaborator() {
     }
 
     if (!genealogyDao_.addCollaboratorByUsername(currentGenealogyId(), username.trimmed(), "editor")) {
-        QMessageBox::warning(this, "邀请失败", "请确认用户存在且当前族谱可访问。");
+        QMessageBox::warning(this, "邀请失败", genealogyDao_.lastError());
         return;
     }
     QMessageBox::information(this, "邀请成功", "协作者已加入当前族谱。");
@@ -424,7 +432,11 @@ void MainWindow::addMember() {
     }
 
     MemberDialog dialog(currentGenealogyId(), this);
-    if (dialog.exec() == QDialog::Accepted && memberDao_.insert(dialog.member())) {
+    if (dialog.exec() == QDialog::Accepted) {
+        if (!memberDao_.insert(dialog.member())) {
+            QMessageBox::warning(this, "新增失败", memberDao_.lastError());
+            return;
+        }
         reloadMembers();
         reloadDashboard();
     }
@@ -439,7 +451,11 @@ void MainWindow::editMember() {
     }
 
     MemberDialog dialog(*member, this);
-    if (dialog.exec() == QDialog::Accepted && memberDao_.update(dialog.member())) {
+    if (dialog.exec() == QDialog::Accepted) {
+        if (!memberDao_.update(dialog.member())) {
+            QMessageBox::warning(this, "编辑失败", memberDao_.lastError());
+            return;
+        }
         reloadMembers();
         reloadDashboard();
     }
@@ -457,10 +473,12 @@ void MainWindow::deleteMember() {
         return;
     }
 
-    if (memberDao_.remove(memberId)) {
-        reloadMembers();
-        reloadDashboard();
+    if (!memberDao_.remove(memberId)) {
+        QMessageBox::warning(this, "删除失败", memberDao_.lastError());
+        return;
     }
+    reloadMembers();
+    reloadDashboard();
 }
 
 void MainWindow::showMemberDetail() {
@@ -506,7 +524,7 @@ void MainWindow::addParentChildRelation() {
                                      parentId,
                                      childId,
                                      parentTypeCombo_->currentData().toString())) {
-        QMessageBox::warning(this, "添加失败", "请检查成员 ID、族谱归属、出生年份和父母唯一性约束。");
+        QMessageBox::warning(this, "添加失败", relationDao_.lastError());
         return;
     }
 
@@ -549,7 +567,7 @@ void MainWindow::addMarriageRelation() {
                                   marriageYear,
                                   divorceYear,
                                   marriageDescriptionEdit_->text().trimmed())) {
-        QMessageBox::warning(this, "添加失败", "请检查成员 ID、族谱归属和婚姻年份。");
+        QMessageBox::warning(this, "添加失败", relationDao_.lastError());
         return;
     }
 

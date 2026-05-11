@@ -14,9 +14,11 @@ public:
                       const QString& password,
                       const QString& realName,
                       const QString& email) const;
+    QString lastError() const;
 
 private:
     QString hashPassword(const QString& password) const;
 
     UserDao userDao_;
+    mutable QString lastError_;
 };

@@ -13,4 +13,8 @@ public:
                 const QString& passwordHash,
                 const QString& realName,
                 const QString& email) const;
+    QString lastError() const;
+
+private:
+    mutable QString lastError_;
 };

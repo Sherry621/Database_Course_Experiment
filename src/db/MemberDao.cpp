@@ -1,5 +1,6 @@
 #include "MemberDao.h"
 
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QVariant>
 
@@ -19,19 +20,25 @@ Member readMember(const QSqlQuery& query) {
 }
 
 std::optional<Member> MemberDao::findById(int memberId) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "SELECT member_id, genealogy_id, name, gender, birth_year, death_year, generation, biography "
         "FROM members WHERE member_id = :member_id");
     query.bindValue(":member_id", memberId);
 
-    if (!query.exec() || !query.next()) {
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return std::nullopt;
+    }
+    if (!query.next()) {
         return std::nullopt;
     }
     return readMember(query);
 }
 
 std::vector<Member> MemberDao::findByGenealogy(int genealogyId, const QString& keyword) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "SELECT member_id, genealogy_id, name, gender, birth_year, death_year, generation, biography "
@@ -46,6 +53,7 @@ std::vector<Member> MemberDao::findByGenealogy(int genealogyId, const QString& k
 
     std::vector<Member> result;
     if (!query.exec()) {
+        lastError_ = query.lastError().text();
         return result;
     }
 
@@ -56,6 +64,7 @@ std::vector<Member> MemberDao::findByGenealogy(int genealogyId, const QString& k
 }
 
 std::vector<Member> MemberDao::findChildren(int memberId) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "SELECT m.member_id, m.genealogy_id, m.name, m.gender, m.birth_year, m.death_year, "
@@ -68,6 +77,7 @@ std::vector<Member> MemberDao::findChildren(int memberId) const {
 
     std::vector<Member> result;
     if (!query.exec()) {
+        lastError_ = query.lastError().text();
         return result;
     }
     while (query.next()) {
@@ -77,6 +87,7 @@ std::vector<Member> MemberDao::findChildren(int memberId) const {
 }
 
 std::vector<Member> MemberDao::findAncestors(int memberId) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "WITH RECURSIVE ancestors AS ("
@@ -96,6 +107,7 @@ std::vector<Member> MemberDao::findAncestors(int memberId) const {
 
     std::vector<Member> result;
     if (!query.exec()) {
+        lastError_ = query.lastError().text();
         return result;
     }
     while (query.next()) {
@@ -105,6 +117,7 @@ std::vector<Member> MemberDao::findAncestors(int memberId) const {
 }
 
 bool MemberDao::insert(const Member& member) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "INSERT INTO members(genealogy_id, name, gender, birth_year, death_year, generation, biography) "
@@ -116,10 +129,15 @@ bool MemberDao::insert(const Member& member) const {
     query.bindValue(":death_year", member.deathYear == 0 ? QVariant() : QVariant(member.deathYear));
     query.bindValue(":generation", member.generation == 0 ? QVariant() : QVariant(member.generation));
     query.bindValue(":biography", member.biography);
-    return query.exec();
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return false;
+    }
+    return true;
 }
 
 bool MemberDao::update(const Member& member) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "UPDATE members SET name = :name, gender = :gender, birth_year = :birth_year, "
@@ -132,12 +150,33 @@ bool MemberDao::update(const Member& member) const {
     query.bindValue(":death_year", member.deathYear == 0 ? QVariant() : QVariant(member.deathYear));
     query.bindValue(":generation", member.generation == 0 ? QVariant() : QVariant(member.generation));
     query.bindValue(":biography", member.biography);
-    return query.exec();
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return false;
+    }
+    if (query.numRowsAffected() == 0) {
+        lastError_ = "未找到要更新的成员。";
+        return false;
+    }
+    return true;
 }
 
 bool MemberDao::remove(int memberId) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare("DELETE FROM members WHERE member_id = :member_id");
     query.bindValue(":member_id", memberId);
-    return query.exec();
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return false;
+    }
+    if (query.numRowsAffected() == 0) {
+        lastError_ = "未找到要删除的成员。";
+        return false;
+    }
+    return true;
+}
+
+QString MemberDao::lastError() const {
+    return lastError_;
 }

@@ -13,4 +13,8 @@ public:
     bool update(const Genealogy& genealogy) const;
     bool remove(int genealogyId, int currentUserId) const;
     bool addCollaboratorByUsername(int genealogyId, const QString& username, const QString& role) const;
+    QString lastError() const;
+
+private:
+    mutable QString lastError_;
 };

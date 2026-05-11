@@ -72,7 +72,10 @@ void LoginWindow::handleRegister() {
     }
 
     if (!authService_.registerUser(username, password, username, QString())) {
-        QMessageBox::warning(this, "注册失败", "用户可能已存在，或数据库写入失败。");
+        const QString detail = authService_.lastError().isEmpty()
+            ? "用户可能已存在，或数据库写入失败。"
+            : authService_.lastError();
+        QMessageBox::warning(this, "注册失败", detail);
         return;
     }
 

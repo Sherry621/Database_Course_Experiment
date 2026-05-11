@@ -16,4 +16,8 @@ public:
     bool insert(const Member& member) const;
     bool update(const Member& member) const;
     bool remove(int memberId) const;
+    QString lastError() const;
+
+private:
+    mutable QString lastError_;
 };

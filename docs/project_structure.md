@@ -3,7 +3,7 @@
 ## 1. 根目录
 
 ```text
-Database_Course_Experiment/
+./
 ├── README.md
 ├── CMakeLists.txt
 ├── docs/

@@ -5,7 +5,7 @@
 确认当前根目录是：
 
 ```bash
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 ```
 
 查看将被 Git 管理的文件：
@@ -112,3 +112,20 @@ C++17 + Qt6 + PostgreSQL genealogy management system for database course project
 - `docs/planning_and_work.md`
 - `docs/project_structure.md`
 - `docs/system_framework.md`
+- `docs/acceptance_checklist.md`
+
+## 8. 本地构建检查
+
+上传前建议至少执行一次：
+
+```bash
+cmake -S . -B build -G Ninja
+cmake --build build
+./build/Stage2Smoke
+```
+
+需要启动图形界面时执行：
+
+```bash
+./scripts/run_wsl.sh
+```
