@@ -53,8 +53,9 @@
 ├── docs/
 │   ├── system_design.md
 │   ├── system_framework.md
-│   ├── operation_guide.md
-│   ├── data_engineering.md
+│   ├── usage.md
+│   ├── data_and_tests.md
+│   ├── planning_and_work.md
 │   ├── project_structure.md
 │   └── github_upload.md
 ├── sql/
@@ -82,8 +83,9 @@
 
 - `README.md`：GitHub 仓库首页说明。
 - `docs/system_design.md`：课程设计完整方案说明。
-- `docs/operation.md`：原始环境配置说明。
-- `docs/work.md`：两人合作分工方案。
+- `docs/usage.md`：环境配置、数据库初始化、编译运行和中文输入说明。
+- `docs/data_and_tests.md`：阶段验收、10 万数据、导入导出和性能测试结果。
+- `docs/planning_and_work.md`：实现路线、演示顺序和两人分工建议。
 - `docs/`：运行、结构、上传和系统框架文档。
 - `sql/`：PostgreSQL 数据库脚本。
 - `src/`：Qt/C++ 主程序源码。
@@ -134,8 +136,13 @@ sudo apt-get install -y \
   postgresql-contrib \
   libpq-dev \
   fonts-noto-cjk \
-  fonts-wqy-microhei
+  fonts-wqy-microhei \
+  fcitx5 \
+  fcitx5-chinese-addons \
+  fcitx5-frontend-qt6
 ```
+
+`fcitx5`、`fcitx5-chinese-addons` 和 `fcitx5-frontend-qt6` 用于 Qt6 中文输入。缺少这些包时，界面可以显示中文，但输入框中通常无法输入中文。
 
 启动 PostgreSQL：
 
@@ -210,10 +217,17 @@ cmake -S . -B build -G Ninja
 cmake --build build
 ```
 
-运行程序：
+运行程序。推荐使用脚本启动，它会设置中文输入相关环境变量：
 
 ```bash
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
+./scripts/setup_fcitx_wsl.sh
+./scripts/run_wsl.sh
+```
+
+如果不需要中文输入，也可以直接运行：
+
+```bash
+env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=xcb ./build/GenealogySystem
 ```
 
 登录：
@@ -243,6 +257,19 @@ sudo apt-get install -y fonts-noto-cjk fonts-wqy-microhei
 fc-cache -fv
 ```
 
+### 无法输入中文
+
+先安装并配置 fcitx5：
+
+```bash
+sudo apt-get update
+sudo apt-get install -y fcitx5 fcitx5-chinese-addons fcitx5-frontend-qt6
+./scripts/setup_fcitx_wsl.sh
+./scripts/run_wsl.sh
+```
+
+不要用 Wayland 方式直接启动来测试中文输入；`scripts/run_wsl.sh` 默认使用 `QT_QPA_PLATFORM=xcb`，在 WSLg/XWayland 下更容易让 fcitx5 接管 Qt 输入框。
+
 ### QStandardPaths 权限警告
 
 推荐使用：
@@ -254,7 +281,9 @@ env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/Geneal
 ## 文档索引
 
 - [系统框架说明](docs/system_framework.md)
-- [操作文档](docs/operation_guide.md)
+- [使用与环境配置](docs/usage.md)
+- [数据工程与阶段验收](docs/data_and_tests.md)
+- [实现路线与分工](docs/planning_and_work.md)
 - [文件结构说明](docs/project_structure.md)
 - [GitHub 上传步骤](docs/github_upload.md)
 
@@ -265,7 +294,7 @@ env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/Geneal
 - 成员 A：数据库设计、SQL 查询、数据生成、导入导出、索引优化与性能分析。
 - 成员 B：C++/Qt 系统开发、界面设计、登录注册、成员管理、树形预览、祖先查询和亲缘链路查询。
 
-详细分工见 `docs/work.md`。
+详细分工见 `docs/planning_and_work.md`。
 
 ## 课程报告材料
 

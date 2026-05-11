@@ -1,6 +1,24 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+missing_packages=()
+command -v fcitx5 >/dev/null 2>&1 || missing_packages+=("fcitx5")
+
+if ! dpkg -s fcitx5-chinese-addons >/dev/null 2>&1; then
+  missing_packages+=("fcitx5-chinese-addons")
+fi
+
+if ! dpkg -s fcitx5-frontend-qt6 >/dev/null 2>&1; then
+  missing_packages+=("fcitx5-frontend-qt6")
+fi
+
+if (( ${#missing_packages[@]} > 0 )); then
+  echo "Missing Chinese input packages: ${missing_packages[*]}" >&2
+  echo "Install them first:" >&2
+  echo "sudo apt-get update && sudo apt-get install -y fcitx5 fcitx5-chinese-addons fcitx5-frontend-qt6" >&2
+  exit 1
+fi
+
 mkdir -p "${HOME}/.config/fcitx5"
 
 pkill -x fcitx5 >/dev/null 2>&1 || true

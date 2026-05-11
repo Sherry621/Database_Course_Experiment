@@ -107,6 +107,8 @@ C++17 + Qt6 + PostgreSQL genealogy management system for database course project
 当前详细内容已经拆分到：
 
 - `docs/system_design.md`
-- `docs/operation_guide.md`
+- `docs/usage.md`
+- `docs/data_and_tests.md`
+- `docs/planning_and_work.md`
 - `docs/project_structure.md`
 - `docs/system_framework.md`

@@ -29,18 +29,12 @@ Database_Course_Experiment/
 
 ```text
 docs/system_design.md
-docs/operation.md
-docs/work.md
-docs/implementation_plan.md
-docs/operation_guide.md
 docs/system_framework.md
-docs/data_engineering.md
-docs/data_engineering_result.md
-docs/stage1_result.md
-docs/stage2_result.md
+docs/usage.md
+docs/data_and_tests.md
+docs/planning_and_work.md
 docs/project_structure.md
 docs/github_upload.md
-docs/fcitx_pinyin_guide.md
 ```
 
 ## 3. src 目录
