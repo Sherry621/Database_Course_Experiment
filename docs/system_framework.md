@@ -11,13 +11,15 @@
 ## 2. 当前目录结构
 
 ```text
-test/
-├── CMakeLists.txt
+src/
 ├── main.cpp
 ├── db/          数据库连接与 DAO
 ├── model/       User、Genealogy、Member 等数据模型
 ├── service/     认证、统计、族谱树、亲缘链路等业务逻辑
 └── ui/          登录窗口、主窗口、成员弹窗
+
+tests/
+└── stage2_smoke.cpp
 
 sql/
 ├── 01_schema.sql        建表脚本
@@ -64,7 +66,7 @@ PostgreSQL 层
 
 1. 执行 `sql/01_schema.sql`、`sql/02_indexes.sql`、`sql/03_triggers.sql` 初始化数据库。
 2. 插入少量用户、族谱、成员、亲子关系测试数据。
-3. 编译运行 `test/` 下 Qt 项目，验证登录和数据库连接。
+3. 在项目根目录编译运行 Qt 项目，验证登录和数据库连接。
 4. 补充族谱管理、成员编辑删除、亲子关系维护、婚姻关系维护界面。
 5. 基于 `tools/generate_data.py` 生成 10 万级 CSV，并使用 `sql/08_load_generated_csv.sql` 执行 `COPY` 导入。
 6. 使用 `sql/09_export_branch.sql` 导出分支备份。

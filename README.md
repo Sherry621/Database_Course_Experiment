@@ -49,37 +49,47 @@
 ```text
 .
 ├── README.md
-├── readme.md
-├── operation.md
-├── work.md
+├── CMakeLists.txt
 ├── docs/
+│   ├── system_design.md
 │   ├── system_framework.md
 │   ├── operation_guide.md
+│   ├── data_engineering.md
 │   ├── project_structure.md
 │   └── github_upload.md
 ├── sql/
 │   ├── 01_schema.sql
 │   ├── 02_indexes.sql
 │   ├── 03_triggers.sql
-│   └── 04_core_queries.sql
-└── test/
-    ├── CMakeLists.txt
-    ├── main.cpp
-    ├── db/
-    ├── model/
-    ├── service/
-    └── ui/
+│   ├── 04_core_queries.sql
+│   └── ...
+├── src/
+│   ├── main.cpp
+│   ├── db/
+│   ├── model/
+│   ├── service/
+│   └── ui/
+├── tests/
+│   └── stage2_smoke.cpp
+├── tools/
+│   └── generate_data.py
+└── scripts/
+    ├── run_wsl.sh
+    └── setup_fcitx_wsl.sh
 ```
 
 说明：
 
 - `README.md`：GitHub 仓库首页说明。
-- `readme.md`：课程设计完整方案说明。
-- `operation.md`：原始环境配置说明。
-- `work.md`：两人合作分工方案。
+- `docs/system_design.md`：课程设计完整方案说明。
+- `docs/operation.md`：原始环境配置说明。
+- `docs/work.md`：两人合作分工方案。
 - `docs/`：运行、结构、上传和系统框架文档。
 - `sql/`：PostgreSQL 数据库脚本。
-- `test/`：Qt/C++ 项目源码。
+- `src/`：Qt/C++ 主程序源码。
+- `tests/`：自动验收和测试程序。
+- `tools/`：数据生成工具。
+- `scripts/`：WSL 运行和输入法辅助脚本。
 
 ## 数据库设计
 
@@ -187,10 +197,10 @@ VALUES ('张氏族谱', '张', 1, '测试族谱');
 
 ## 编译运行
 
-进入 Qt 项目目录：
+进入项目目录：
 
 ```bash
-cd "Database_Course_Experiment/test"
+cd "Database_Course_Experiment"
 ```
 
 使用当前项目下的 `build/` 构建目录：
@@ -255,7 +265,7 @@ env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/Geneal
 - 成员 A：数据库设计、SQL 查询、数据生成、导入导出、索引优化与性能分析。
 - 成员 B：C++/Qt 系统开发、界面设计、登录注册、成员管理、树形预览、祖先查询和亲缘链路查询。
 
-详细分工见 `work.md`。
+详细分工见 `docs/work.md`。
 
 ## 课程报告材料
 

@@ -1,174 +1,87 @@
 # 文件结构说明
 
-## 1. 根目录文件
+## 1. 根目录
 
 ```text
-readme.md
+Database_Course_Experiment/
+├── README.md
+├── CMakeLists.txt
+├── docs/
+├── sql/
+├── src/
+├── tests/
+├── tools/
+├── scripts/
+└── generated_data/
 ```
 
-课程设计总体方案，包含系统目标、技术选型、功能设计、数据库设计、索引设计、性能测试和报告结构。
-
-```text
-operation.md
-```
-
-原始环境配置说明，重点是 VSCode、WSL2、Qt6 和 PostgreSQL 的安装配置。
-
-```text
-work.md
-```
-
-两人合作分工方案，区分数据库负责人和 C++/Qt 系统负责人。
-
-```text
-.gitignore
-```
-
-GitHub 上传时忽略构建产物、IDE 本地配置、二进制文件、数据库备份和生成数据。
+- `README.md`：项目首页说明。
+- `CMakeLists.txt`：顶层 CMake 构建配置。
+- `docs/`：设计、运行、阶段结果和报告辅助文档。
+- `sql/`：PostgreSQL 建表、索引、触发器、查询、导入导出和性能测试脚本。
+- `src/`：Qt/C++ 主程序源码。
+- `tests/`：自动验收程序。
+- `tools/`：数据生成工具。
+- `scripts/`：WSL 运行和输入法辅助脚本。
+- `generated_data/`：生成 CSV 和导出文件，本地生成且不提交。
 
 ## 2. docs 目录
 
 ```text
-docs/system_framework.md
-```
-
-系统分层框架说明，包括 UI 层、Service 层、DAO 层、Database 层和 PostgreSQL 层。
-
-```text
+docs/system_design.md
+docs/operation.md
+docs/work.md
+docs/implementation_plan.md
 docs/operation_guide.md
-```
-
-实际运行操作文档，记录数据库初始化、编译运行、登录测试和常见问题处理。
-
-```text
+docs/system_framework.md
+docs/data_engineering.md
+docs/data_engineering_result.md
+docs/stage1_result.md
+docs/stage2_result.md
+docs/project_structure.md
+docs/github_upload.md
 docs/fcitx_pinyin_guide.md
 ```
 
-WSL2 + Qt6 中文拼音输入法配置说明。
+## 3. src 目录
 
 ```text
-docs/project_structure.md
+src/
+├── main.cpp
+├── db/
+├── model/
+├── service/
+└── ui/
 ```
 
-当前文件结构说明。
+- `db/`：`DatabaseManager` 与 DAO 数据访问层。
+- `model/`：`User`、`Genealogy`、`Member` 等数据模型。
+- `service/`：认证、统计、族谱树和亲缘链路业务逻辑。
+- `ui/`：Qt Widgets 界面。
+
+## 4. tests 目录
 
 ```text
-docs/github_upload.md
+tests/stage2_smoke.cpp
 ```
 
-GitHub 建仓和上传步骤。
+`Stage2Smoke` 复用主程序连接、DAO 和 Service，验证数据库连接、登录、族谱加载、Dashboard 和成员列表。
 
-## 3. sql 目录
+## 5. scripts 目录
 
 ```text
-sql/01_schema.sql
+scripts/run_wsl.sh
+scripts/setup_fcitx_wsl.sh
 ```
 
-创建基础表：
+- `run_wsl.sh`：从项目根目录启动 `build/GenealogySystem`。
+- `setup_fcitx_wsl.sh`：配置 WSLg 下的 fcitx5 拼音输入法。
 
-- users
-- genealogies
-- genealogy_collaborators
-- members
-- parent_child_relations
-- marriages
+## 6. 不应上传的目录
 
 ```text
-sql/02_indexes.sql
+build/
+generated_data/
 ```
 
-创建索引：
-
-- 成员姓名三元组 GIN 索引
-- parent_id 查询子节点索引
-- child_id 查询父节点索引
-- 族谱成员筛选索引
-- 婚姻关系查询索引
-
-```text
-sql/03_triggers.sql
-```
-
-创建触发器：
-
-- 检查亲子关系成员是否属于同一族谱
-- 检查父母出生年份早于子女
-- 检查婚姻关系双方是否属于同一族谱
-
-```text
-sql/04_core_queries.sql
-```
-
-课程要求核心 SQL：
-
-- 查询配偶和子女
-- 递归查询祖先
-- 统计平均寿命最长的一代
-- 查询超过 50 岁且无配偶男性
-- 查询早于同辈平均出生年份的成员
-
-## 4. test 目录
-
-```text
-test/CMakeLists.txt
-```
-
-Qt6 CMake 工程配置。
-
-```text
-test/main.cpp
-```
-
-程序入口，初始化 QApplication，并设置中文字体 fallback。
-
-```text
-test/model/
-```
-
-数据模型：
-
-- User
-- Genealogy
-- Member
-- RelationPath
-
-```text
-test/db/
-```
-
-数据访问层：
-
-- DatabaseManager：数据库连接
-- UserDao：用户查询与插入
-- GenealogyDao：族谱查询与插入
-- MemberDao：成员增删改查、祖先查询、子女查询
-- RelationDao：亲子边读取和插入
-
-```text
-test/service/
-```
-
-业务逻辑层：
-
-- AuthService：注册、登录、密码哈希
-- DashboardService：统计数据
-- TreeService：后代、祖先、亲缘链路 BFS
-
-```text
-test/ui/
-```
-
-界面层：
-
-- LoginWindow：登录注册窗口
-- MainWindow：主界面
-- MemberDialog：新增成员弹窗
-
-## 5. 不应上传的目录
-
-```text
-test/build/
-test/build/
-```
-
-这些是本地构建产物，不属于源码。
+这些是本地构建产物或生成数据，已经由 `.gitignore` 忽略。

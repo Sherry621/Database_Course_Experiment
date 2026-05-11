@@ -1,8 +1,0 @@
-/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test/build/CMakeFiles/GenealogySystem.dir
-/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test/build/CMakeFiles/Stage2Smoke.dir
-/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test/build/CMakeFiles/edit_cache.dir
-/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test/build/CMakeFiles/rebuild_cache.dir
-/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test/build/CMakeFiles/GenealogySystem_autogen_timestamp_deps.dir
-/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test/build/CMakeFiles/GenealogySystem_autogen.dir
-/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test/build/CMakeFiles/Stage2Smoke_autogen_timestamp_deps.dir
-/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test/build/CMakeFiles/Stage2Smoke_autogen.dir

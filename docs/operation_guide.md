@@ -33,27 +33,27 @@
 ## 2. 目录结构
 
 ```text
-shujuku/
-├── readme.md                 课程方案与系统设计说明
-├── operation.md              环境配置原始说明
-├── work.md                   两人分工说明
+Database_Course_Experiment/
+├── README.md
+├── CMakeLists.txt
 ├── docs/
+│   ├── system_design.md      课程方案与系统设计说明
+│   ├── operation.md          环境配置原始说明
+│   ├── work.md               两人分工说明
 │   ├── system_framework.md   系统框架说明
 │   ├── operation_guide.md    本操作文档
 │   ├── project_structure.md  GitHub 仓库结构说明
+│   ├── data_engineering.md   数据工程说明
 │   └── github_upload.md      GitHub 上传步骤
 ├── sql/
 │   ├── 01_schema.sql         建表脚本
 │   ├── 02_indexes.sql        索引脚本
 │   ├── 03_triggers.sql       触发器脚本
 │   └── 04_core_queries.sql   核心查询 SQL
-└── test/
-    ├── CMakeLists.txt
-    ├── main.cpp
-    ├── db/                   数据库连接与 DAO
-    ├── model/                数据模型
-    ├── service/              业务逻辑
-    └── ui/                   Qt 界面
+├── src/                      Qt/C++ 主程序源码
+├── tests/                    自动验收程序
+├── tools/                    数据生成工具
+└── scripts/                  运行辅助脚本
 ```
 
 ## 3. WSL 环境安装
@@ -183,7 +183,7 @@ SELECT user_id, username FROM users;
 进入 Qt 项目目录：
 
 ```bash
-cd "Database_Course_Experiment/test"
+cd "Database_Course_Experiment"
 ```
 
 如果 `build/` 目录来自其他路径或 Windows 环境，先删除旧构建缓存，再使用当前项目下的 `build/`：
@@ -220,7 +220,7 @@ Make command was: D:/Qt/Tools/Ninja/ninja.exe
 原因是 Windows 和 WSL 共用了同一个构建目录。解决方式：
 
 ```bash
-cd "Database_Course_Experiment/test"
+cd "Database_Course_Experiment"
 cmake -S . -B build -G Ninja
 cmake --build build
 ```
@@ -245,9 +245,9 @@ docs/fcitx_pinyin_guide.md
 推荐运行方式：
 
 ```bash
-cd "Database_Course_Experiment/test"
-./setup_fcitx_wsl.sh
-./run_wsl.sh
+cd "Database_Course_Experiment"
+./scripts/setup_fcitx_wsl.sh
+./scripts/run_wsl.sh
 ```
 
 ### 8.3 QStandardPaths 权限警告
@@ -286,8 +286,7 @@ VALUES ('张氏族谱', '张', 你的_user_id, '测试族谱');
 不要上传构建目录和数据库导出文件：
 
 ```text
-test/build/
-test/build/
+build/
 *.csv
 *.dump
 *.backup

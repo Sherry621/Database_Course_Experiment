@@ -95,7 +95,7 @@ psql 可以 SELECT 到用户、族谱、成员。
 要做：
 
 ```bash
-cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test"
+cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
 cmake -S . -B build -G Ninja
 cmake --build build
 env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
@@ -292,6 +292,6 @@ Dashboard
    统一并初始化 `Database_Course_Experiment/sql`，插入小测试数据，保证所有核心 SQL 都能跑通。
 
 2. 程序优先
-   编译运行 `Database_Course_Experiment/test`，修复连接和字段问题，先让登录、族谱加载、成员列表可用。
+   编译运行 `Database_Course_Experiment`，修复连接和字段问题，先让登录、族谱加载、成员列表可用。
 
 更推荐先做数据库优先。原因是 C++/Qt 所有界面都依赖稳定表结构，如果表结构还没定，后面 DAO 会反复改。

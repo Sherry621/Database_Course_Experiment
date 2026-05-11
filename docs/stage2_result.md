@@ -7,14 +7,14 @@
 原有构建目录不可复用：
 
 ```text
-test/build      来自 Windows/MinGW 路径 c:/Users/Sherry Peng/...
-test/build-wsl  来自旧 WSL 路径 /mnt/c/Users/Sherry Peng/...
+build      来自 Windows/MinGW 路径 c:/Users/Sherry Peng/...
+旧 WSL 构建目录来自 /mnt/c/Users/Sherry Peng/... 路径
 ```
 
 这两个目录都是 CMake/Ninja 构建产物，不是源码文件，因此已清理并重新生成当前路径下的标准构建目录：
 
 ```text
-Database_Course_Experiment/test/build
+Database_Course_Experiment/build
 ```
 
 ## 2. 编译命令
@@ -22,7 +22,7 @@ Database_Course_Experiment/test/build
 执行目录：
 
 ```text
-Database_Course_Experiment/test
+Database_Course_Experiment
 ```
 
 执行命令：
@@ -115,7 +115,7 @@ QStandardPaths: wrong permissions on runtime directory /mnt/wslg/runtime-dir, 07
 后续手动运行 GUI：
 
 ```bash
-cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test"
+cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
 env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
 ```
 
