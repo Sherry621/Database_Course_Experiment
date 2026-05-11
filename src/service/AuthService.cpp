@@ -1,12 +1,14 @@
 #include "AuthService.h"
 
 #include <QCryptographicHash>
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QVariant>
 
 #include "db/DatabaseManager.h"
 
 std::optional<User> AuthService::login(const QString& username, const QString& password) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "SELECT user_id, username, real_name, email "
@@ -15,7 +17,11 @@ std::optional<User> AuthService::login(const QString& username, const QString& p
     query.bindValue(":username", username);
     query.bindValue(":password_hash", hashPassword(password));
 
-    if (!query.exec() || !query.next()) {
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return std::nullopt;
+    }
+    if (!query.next()) {
         return std::nullopt;
     }
 
@@ -29,9 +35,18 @@ bool AuthService::registerUser(const QString& username,
                                const QString& password,
                                const QString& realName,
                                const QString& email) const {
-    return userDao_.insert(username, hashPassword(password), realName, email);
+    lastError_.clear();
+    if (!userDao_.insert(username, hashPassword(password), realName, email)) {
+        lastError_ = userDao_.lastError();
+        return false;
+    }
+    return true;
 }
 
 QString AuthService::hashPassword(const QString& password) const {
     return QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex();
+}
+
+QString AuthService::lastError() const {
+    return lastError_;
 }

@@ -145,7 +145,7 @@ CREATE DATABASE genealogy_lab OWNER genealogy_user;
 ```bash
 cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 
 cmake -S . -B build -G Ninja
 cmake --build build

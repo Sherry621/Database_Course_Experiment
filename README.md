@@ -161,7 +161,7 @@ CREATE DATABASE genealogy_lab OWNER genealogy_user;
 执行初始化脚本：
 
 ```bash
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/01_schema.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/02_indexes.sql
@@ -200,7 +200,7 @@ VALUES ('张氏族谱', '张', 1, '测试族谱');
 进入项目目录：
 
 ```bash
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 ```
 
 使用当前项目下的 `build/` 构建目录：
@@ -213,7 +213,7 @@ cmake --build build
 运行程序：
 
 ```bash
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
+./scripts/run_wsl.sh
 ```
 
 登录：
@@ -248,7 +248,7 @@ fc-cache -fv
 推荐使用：
 
 ```bash
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
+./scripts/run_wsl.sh
 ```
 
 ## 文档索引
@@ -257,6 +257,7 @@ env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/Geneal
 - [操作文档](docs/operation_guide.md)
 - [文件结构说明](docs/project_structure.md)
 - [GitHub 上传步骤](docs/github_upload.md)
+- [验收检查清单](docs/acceptance_checklist.md)
 
 ## 分工建议
 

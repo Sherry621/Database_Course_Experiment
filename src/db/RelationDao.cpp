@@ -2,6 +2,7 @@
 
 #include <algorithm>
 
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QString>
 #include <QVariant>
@@ -9,6 +10,7 @@
 #include "db/DatabaseManager.h"
 
 std::vector<std::pair<int, int>> RelationDao::findParentChildEdges(int genealogyId) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "SELECT parent_id, child_id "
@@ -18,6 +20,7 @@ std::vector<std::pair<int, int>> RelationDao::findParentChildEdges(int genealogy
 
     std::vector<std::pair<int, int>> edges;
     if (!query.exec()) {
+        lastError_ = query.lastError().text();
         return edges;
     }
 
@@ -28,6 +31,7 @@ std::vector<std::pair<int, int>> RelationDao::findParentChildEdges(int genealogy
 }
 
 bool RelationDao::addParentChild(int genealogyId, int parentId, int childId, const QString& relationType) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "INSERT INTO parent_child_relations(genealogy_id, parent_id, child_id, relation_type) "
@@ -36,7 +40,11 @@ bool RelationDao::addParentChild(int genealogyId, int parentId, int childId, con
     query.bindValue(":parent_id", parentId);
     query.bindValue(":child_id", childId);
     query.bindValue(":relation_type", relationType);
-    return query.exec();
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return false;
+    }
+    return true;
 }
 
 bool RelationDao::addMarriage(int genealogyId,
@@ -45,7 +53,9 @@ bool RelationDao::addMarriage(int genealogyId,
                               int marriageYear,
                               int divorceYear,
                               const QString& description) const {
+    lastError_.clear();
     if (person1Id == person2Id) {
+        lastError_ = "婚姻关系双方不能是同一个人。";
         return false;
     }
 
@@ -61,5 +71,13 @@ bool RelationDao::addMarriage(int genealogyId,
     query.bindValue(":marriage_year", marriageYear == 0 ? QVariant() : QVariant(marriageYear));
     query.bindValue(":divorce_year", divorceYear == 0 ? QVariant() : QVariant(divorceYear));
     query.bindValue(":description", description);
-    return query.exec();
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return false;
+    }
+    return true;
+}
+
+QString RelationDao::lastError() const {
+    return lastError_;
 }

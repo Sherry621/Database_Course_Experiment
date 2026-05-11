@@ -12,13 +12,13 @@
 2. 根目录的 `sql/`、`data/`、`scripts/`
    这里已经有大数据生成、CSV、导入、核心查询、性能测试脚本，适合作为数据库实验材料来源。
 
-3. `Database_Course_Experiment/`
+3. `./`
    这里是队友搭好的 C++/Qt 主工程，包括 Qt 界面、DAO、Service、PostgreSQL 脚本。它更适合作为最终运行和演示的主工程。
 
 建议采用以下主线：
 
 ```text
-以 Database_Course_Experiment/ 作为主工程
+以 ./ 作为主工程
 以它的 C++/Qt 代码和 SQL 字段命名为准
 把根目录 scripts/sql/data 中可用的内容迁移或改写进主工程
 ```
@@ -27,7 +27,7 @@
 
 ## 2. 必须先统一的数据库契约
 
-正式写 C++ 功能前，先确认一套表结构。建议使用 `Database_Course_Experiment/sql/01_schema.sql` 作为标准：
+正式写 C++ 功能前，先确认一套表结构。建议使用 `./sql/01_schema.sql` 作为标准：
 
 ```text
 users(user_id, username, password_hash, real_name, email, created_at)
@@ -62,7 +62,7 @@ CREATE DATABASE genealogy_lab OWNER genealogy_user;
 3. 在主工程里执行建表、索引和触发器：
 
 ```bash
-cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
+cd "/home/xsy/mySchoolProject/Database Course lab/当前项目根目录"
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/01_schema.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/02_indexes.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/03_triggers.sql
@@ -95,7 +95,7 @@ psql 可以 SELECT 到用户、族谱、成员。
 要做：
 
 ```bash
-cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
+cd "/home/xsy/mySchoolProject/Database Course lab/当前项目根目录"
 cmake -S . -B build -G Ninja
 cmake --build build
 env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
@@ -166,7 +166,7 @@ MainWindow 的树形预览、祖先查询、亲缘链路页面
    C++ 中用 BFS。报告中重点解释：亲子关系可以看成无向图，BFS 找到的是边数最短的亲缘通路。
 
 4. 核心 SQL 文件
-   `Database_Course_Experiment/sql/04_core_queries.sql` 已覆盖 PPT 的五个 SQL 需求，后续只需要在数据库中跑出截图并贴到报告。
+   `./sql/04_core_queries.sql` 已覆盖 PPT 的五个 SQL 需求，后续只需要在数据库中跑出截图并贴到报告。
 
 验收标准：
 
@@ -184,9 +184,9 @@ MainWindow 的树形预览、祖先查询、亲缘链路页面
 根目录 `scripts/generate_data.py` 已经能生成 10 个族谱和 10 万成员，但它现在匹配的是根目录 SQL 字段，不完全匹配主工程 SQL。下一步建议复制或改写成：
 
 ```text
-Database_Course_Experiment/tools/generate_data.py
-Database_Course_Experiment/sql/05_load_csv.sql
-Database_Course_Experiment/sql/06_export_branch.sql
+./tools/generate_data.py
+./sql/05_load_csv.sql
+./sql/06_export_branch.sql
 ```
 
 改写重点：
@@ -289,9 +289,9 @@ Dashboard
 建议下一步从下面两件事中选一个开始：
 
 1. 数据库优先
-   统一并初始化 `Database_Course_Experiment/sql`，插入小测试数据，保证所有核心 SQL 都能跑通。
+   统一并初始化 `./sql`，插入小测试数据，保证所有核心 SQL 都能跑通。
 
 2. 程序优先
-   编译运行 `Database_Course_Experiment`，修复连接和字段问题，先让登录、族谱加载、成员列表可用。
+   编译运行 `当前项目根目录`，修复连接和字段问题，先让登录、族谱加载、成员列表可用。
 
 更推荐先做数据库优先。原因是 C++/Qt 所有界面都依赖稳定表结构，如果表结构还没定，后面 DAO 会反复改。

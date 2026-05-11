@@ -14,4 +14,8 @@ public:
                      int marriageYear,
                      int divorceYear,
                      const QString& description) const;
+    QString lastError() const;
+
+private:
+    mutable QString lastError_;
 };

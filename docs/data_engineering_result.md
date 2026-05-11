@@ -7,7 +7,7 @@
 执行命令：
 
 ```bash
-cd Database_Course_Experiment
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 python3 tools/generate_data.py --out generated_data --total-members 100000
 ```
 

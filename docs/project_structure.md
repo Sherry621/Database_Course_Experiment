@@ -3,7 +3,7 @@
 ## 1. 根目录
 
 ```text
-Database_Course_Experiment/
+./
 ├── README.md
 ├── CMakeLists.txt
 ├── docs/
@@ -41,6 +41,7 @@ docs/stage2_result.md
 docs/project_structure.md
 docs/github_upload.md
 docs/fcitx_pinyin_guide.md
+docs/acceptance_checklist.md
 ```
 
 ## 3. src 目录

@@ -33,7 +33,7 @@
 ## 2. 目录结构
 
 ```text
-Database_Course_Experiment/
+./
 ├── README.md
 ├── CMakeLists.txt
 ├── docs/
@@ -126,7 +126,7 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab"
 进入项目根目录：
 
 ```bash
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 ```
 
 执行 SQL 脚本：
@@ -183,7 +183,7 @@ SELECT user_id, username FROM users;
 进入 Qt 项目目录：
 
 ```bash
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 ```
 
 如果 `build/` 目录来自其他路径或 Windows 环境，先删除旧构建缓存，再使用当前项目下的 `build/`：
@@ -196,7 +196,7 @@ cmake --build build
 运行：
 
 ```bash
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
+./scripts/run_wsl.sh
 ```
 
 登录测试账号：
@@ -220,7 +220,7 @@ Make command was: D:/Qt/Tools/Ninja/ninja.exe
 原因是 Windows 和 WSL 共用了同一个构建目录。解决方式：
 
 ```bash
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 cmake -S . -B build -G Ninja
 cmake --build build
 ```
@@ -245,7 +245,7 @@ docs/fcitx_pinyin_guide.md
 推荐运行方式：
 
 ```bash
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 ./scripts/setup_fcitx_wsl.sh
 ./scripts/run_wsl.sh
 ```
@@ -261,7 +261,7 @@ QStandardPaths: wrong permissions on runtime directory /run/user/1000/, 0755 ins
 推荐使用 WSLg runtime 运行：
 
 ```bash
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
+./scripts/run_wsl.sh
 ```
 
 也可以修复权限：

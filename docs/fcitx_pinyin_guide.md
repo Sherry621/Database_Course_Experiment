@@ -64,7 +64,7 @@ scripts/setup_fcitx_wsl.sh
 执行：
 
 ```bash
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 chmod +x scripts/setup_fcitx_wsl.sh scripts/run_wsl.sh
 ./scripts/setup_fcitx_wsl.sh
 ```
@@ -157,7 +157,7 @@ pgrep -a fcitx5
 应该使用项目提供的启动脚本：
 
 ```bash
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 cmake --build build
 ./scripts/run_wsl.sh
 ```
@@ -240,7 +240,7 @@ cd & 'C:\Users\Sherry Peng\OneDrive\桌面\shujuku'
 WSL 正确写法：
 
 ```bash
-cd "Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 ```
 
 ### 10.2 profile 被 fcitx5 覆盖回 keyboard-us

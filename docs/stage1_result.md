@@ -17,7 +17,7 @@ RDBMS: PostgreSQL 16.13
 执行目录：
 
 ```text
-Database_Course_Experiment/
+./
 ```
 
 按顺序执行：

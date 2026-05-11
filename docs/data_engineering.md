@@ -7,7 +7,7 @@
 执行目录：
 
 ```bash
-cd Database_Course_Experiment
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 ```
 
 生成默认 100000 名成员：

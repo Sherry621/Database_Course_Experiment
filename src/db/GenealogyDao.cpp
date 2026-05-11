@@ -1,11 +1,13 @@
 #include "GenealogyDao.h"
 
+#include <QSqlError>
 #include <QSqlQuery>
 #include <QVariant>
 
 #include "db/DatabaseManager.h"
 
 std::vector<Genealogy> GenealogyDao::findAccessibleByUser(int userId) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "SELECT DISTINCT g.genealogy_id, g.title, g.family_surname, g.revision_time, "
@@ -18,6 +20,7 @@ std::vector<Genealogy> GenealogyDao::findAccessibleByUser(int userId) const {
 
     std::vector<Genealogy> result;
     if (!query.exec()) {
+        lastError_ = query.lastError().text();
         return result;
     }
 
@@ -33,13 +36,18 @@ std::vector<Genealogy> GenealogyDao::findAccessibleByUser(int userId) const {
 }
 
 std::optional<Genealogy> GenealogyDao::findById(int genealogyId) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "SELECT genealogy_id, title, family_surname, revision_time, creator_user_id, description "
         "FROM genealogies WHERE genealogy_id = :genealogy_id");
     query.bindValue(":genealogy_id", genealogyId);
 
-    if (!query.exec() || !query.next()) {
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return std::nullopt;
+    }
+    if (!query.next()) {
         return std::nullopt;
     }
 
@@ -52,6 +60,7 @@ std::optional<Genealogy> GenealogyDao::findById(int genealogyId) const {
 }
 
 bool GenealogyDao::insert(const Genealogy& genealogy) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "INSERT INTO genealogies(title, family_surname, revision_time, creator_user_id, description) "
@@ -61,10 +70,15 @@ bool GenealogyDao::insert(const Genealogy& genealogy) const {
     query.bindValue(":revision_time", genealogy.revisionTime);
     query.bindValue(":creator_user_id", genealogy.creatorUserId);
     query.bindValue(":description", genealogy.description);
-    return query.exec();
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return false;
+    }
+    return true;
 }
 
 bool GenealogyDao::update(const Genealogy& genealogy) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "UPDATE genealogies "
@@ -76,20 +90,38 @@ bool GenealogyDao::update(const Genealogy& genealogy) const {
     query.bindValue(":family_surname", genealogy.familySurname);
     query.bindValue(":revision_time", genealogy.revisionTime);
     query.bindValue(":description", genealogy.description);
-    return query.exec();
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return false;
+    }
+    if (query.numRowsAffected() == 0) {
+        lastError_ = "未找到要更新的族谱。";
+        return false;
+    }
+    return true;
 }
 
 bool GenealogyDao::remove(int genealogyId, int currentUserId) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "DELETE FROM genealogies "
         "WHERE genealogy_id = :genealogy_id AND creator_user_id = :creator_user_id");
     query.bindValue(":genealogy_id", genealogyId);
     query.bindValue(":creator_user_id", currentUserId);
-    return query.exec();
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return false;
+    }
+    if (query.numRowsAffected() == 0) {
+        lastError_ = "只有族谱创建者可以删除族谱，或族谱不存在。";
+        return false;
+    }
+    return true;
 }
 
 bool GenealogyDao::addCollaboratorByUsername(int genealogyId, const QString& username, const QString& role) const {
+    lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(
         "INSERT INTO genealogy_collaborators(genealogy_id, user_id, role) "
@@ -98,5 +130,17 @@ bool GenealogyDao::addCollaboratorByUsername(int genealogyId, const QString& use
     query.bindValue(":genealogy_id", genealogyId);
     query.bindValue(":username", username);
     query.bindValue(":role", role);
-    return query.exec() && query.numRowsAffected() > 0;
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return false;
+    }
+    if (query.numRowsAffected() == 0) {
+        lastError_ = "未找到该用户名，无法邀请协作者。";
+        return false;
+    }
+    return true;
+}
+
+QString GenealogyDao::lastError() const {
+    return lastError_;
 }
