@@ -11,44 +11,49 @@
 - Dashboard 统计
 - 成员列表与姓名查询
 - 新增成员
+- 族谱新增、修改、删除
+- 邀请协作者
+- 成员编辑、删除和详情查看
+- 亲子关系维护
+- 婚姻关系维护
 - 后代树形预览
 - 祖先查询
 - 两个成员之间亲缘链路 BFS 查询
 - PostgreSQL 建表、索引、触发器和核心 SQL 脚本
+- 10 万级模拟数据生成工具
+- COPY 批量导入脚本
+- 分支导出脚本
+- EXPLAIN ANALYZE 性能测试脚本
 
 当前框架还需要继续补充：
 
-- 族谱新增、修改、删除界面
-- 成员编辑、删除界面
-- 亲子关系维护界面
-- 婚姻关系维护界面
-- 10 万级模拟数据生成工具
-- EXPLAIN ANALYZE 性能测试截图整理
+- ER 图、关系模型、3NF/BCNF 分析
+- 实验报告截图与最终演示材料整理
 
 ## 2. 目录结构
 
 ```text
-shujuku/
-├── readme.md                 课程方案与系统设计说明
-├── operation.md              环境配置原始说明
-├── work.md                   两人分工说明
+Database_Course_Experiment/
+├── README.md
+├── CMakeLists.txt
 ├── docs/
+│   ├── system_design.md      课程方案与系统设计说明
+│   ├── operation.md          环境配置原始说明
+│   ├── work.md               两人分工说明
 │   ├── system_framework.md   系统框架说明
 │   ├── operation_guide.md    本操作文档
 │   ├── project_structure.md  GitHub 仓库结构说明
+│   ├── data_engineering.md   数据工程说明
 │   └── github_upload.md      GitHub 上传步骤
 ├── sql/
 │   ├── 01_schema.sql         建表脚本
 │   ├── 02_indexes.sql        索引脚本
 │   ├── 03_triggers.sql       触发器脚本
 │   └── 04_core_queries.sql   核心查询 SQL
-└── test/
-    ├── CMakeLists.txt
-    ├── main.cpp
-    ├── db/                   数据库连接与 DAO
-    ├── model/                数据模型
-    ├── service/              业务逻辑
-    └── ui/                   Qt 界面
+├── src/                      Qt/C++ 主程序源码
+├── tests/                    自动验收程序
+├── tools/                    数据生成工具
+└── scripts/                  运行辅助脚本
 ```
 
 ## 3. WSL 环境安装
@@ -121,7 +126,7 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab"
 进入项目根目录：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
+cd "Database_Course_Experiment"
 ```
 
 执行 SQL 脚本：
@@ -178,20 +183,20 @@ SELECT user_id, username FROM users;
 进入 Qt 项目目录：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
+cd "Database_Course_Experiment"
 ```
 
-WSL 不要使用 Windows 生成过的 `build/` 目录，应单独使用 `build-wsl/`：
+如果 `build/` 目录来自其他路径或 Windows 环境，先删除旧构建缓存，再使用当前项目下的 `build/`：
 
 ```bash
-cmake -S . -B build-wsl -G Ninja
-cmake --build build-wsl
+cmake -S . -B build -G Ninja
+cmake --build build
 ```
 
 运行：
 
 ```bash
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build-wsl/GenealogySystem
+env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
 ```
 
 登录测试账号：
@@ -215,9 +220,9 @@ Make command was: D:/Qt/Tools/Ninja/ninja.exe
 原因是 Windows 和 WSL 共用了同一个构建目录。解决方式：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
-cmake -S . -B build-wsl -G Ninja
-cmake --build build-wsl
+cd "Database_Course_Experiment"
+cmake -S . -B build -G Ninja
+cmake --build build
 ```
 
 ### 8.2 中文显示为方框
@@ -240,9 +245,9 @@ docs/fcitx_pinyin_guide.md
 推荐运行方式：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
-./setup_fcitx_wsl.sh
-./run_wsl.sh
+cd "Database_Course_Experiment"
+./scripts/setup_fcitx_wsl.sh
+./scripts/run_wsl.sh
 ```
 
 ### 8.3 QStandardPaths 权限警告
@@ -256,7 +261,7 @@ QStandardPaths: wrong permissions on runtime directory /run/user/1000/, 0755 ins
 推荐使用 WSLg runtime 运行：
 
 ```bash
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build-wsl/GenealogySystem
+env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
 ```
 
 也可以修复权限：
@@ -281,8 +286,7 @@ VALUES ('张氏族谱', '张', 你的_user_id, '测试族谱');
 不要上传构建目录和数据库导出文件：
 
 ```text
-test/build/
-test/build-wsl/
+build/
 *.csv
 *.dump
 *.backup

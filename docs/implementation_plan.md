@@ -95,10 +95,11 @@ psql 可以 SELECT 到用户、族谱、成员。
 要做：
 
 ```bash
-cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment/test"
-cmake -S . -B build-wsl -G Ninja
-cmake --build build-wsl
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build-wsl/GenealogySystem
+cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
+cmake -S . -B build -G Ninja
+cmake --build build
+env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=wayland ./build/GenealogySystem
+./build/Stage2Smoke
 ```
 
 重点检查：
@@ -115,6 +116,8 @@ Dashboard 是否能显示人数和关系数量。
 ## 5. 阶段三：补齐基础 CRUD
 
 目标：完成 PPT 中“族谱、成员管理增删改查”和“邀请协作”。
+
+当前状态：族谱新增、编辑、删除，成员新增、编辑、删除、详情，协作者邀请，亲子关系维护和婚姻关系维护已经具备基础界面。后续阶段三主要做权限细化、输入校验、错误提示和演示体验打磨。
 
 优先级：
 
@@ -289,6 +292,6 @@ Dashboard
    统一并初始化 `Database_Course_Experiment/sql`，插入小测试数据，保证所有核心 SQL 都能跑通。
 
 2. 程序优先
-   编译运行 `Database_Course_Experiment/test`，修复连接和字段问题，先让登录、族谱加载、成员列表可用。
+   编译运行 `Database_Course_Experiment`，修复连接和字段问题，先让登录、族谱加载、成员列表可用。
 
 更推荐先做数据库优先。原因是 C++/Qt 所有界面都依赖稳定表结构，如果表结构还没定，后面 DAO 会反复改。

@@ -4,6 +4,7 @@
 #include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QTextEdit>
 #include <QVBoxLayout>
 
@@ -56,6 +57,39 @@ void MemberDialog::fillMember(const Member& member) {
     deathYearEdit_->setText(member.deathYear == 0 ? QString() : QString::number(member.deathYear));
     generationEdit_->setText(member.generation == 0 ? QString() : QString::number(member.generation));
     biographyEdit_->setPlainText(member.biography);
+}
+
+void MemberDialog::accept() {
+    if (nameEdit_->text().trimmed().isEmpty()) {
+        QMessageBox::warning(this, "输入错误", "姓名不能为空。");
+        return;
+    }
+
+    bool ok = false;
+    const int birthYear = birthYearEdit_->text().trimmed().toInt(&ok);
+    if (!birthYearEdit_->text().trimmed().isEmpty() && (!ok || birthYear < 0)) {
+        QMessageBox::warning(this, "输入错误", "出生年必须是非负整数，或者留空。");
+        return;
+    }
+
+    const int deathYear = deathYearEdit_->text().trimmed().toInt(&ok);
+    if (!deathYearEdit_->text().trimmed().isEmpty() && (!ok || deathYear < 0)) {
+        QMessageBox::warning(this, "输入错误", "死亡年必须是非负整数，或者留空。");
+        return;
+    }
+
+    const int generation = generationEdit_->text().trimmed().toInt(&ok);
+    if (!generationEdit_->text().trimmed().isEmpty() && (!ok || generation < 1)) {
+        QMessageBox::warning(this, "输入错误", "代数必须是大于 0 的整数，或者留空。");
+        return;
+    }
+
+    if (birthYear > 0 && deathYear > 0 && deathYear < birthYear) {
+        QMessageBox::warning(this, "输入错误", "死亡年不能早于出生年。");
+        return;
+    }
+
+    QDialog::accept();
 }
 
 Member MemberDialog::member() const {

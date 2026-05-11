@@ -375,7 +375,7 @@ Windows Qt 和 WSL Qt 是两套独立环境。
 
 # 12. 当前项目注意事项
 
-`DOC/readme.md` 中部分表名使用单数形式，例如：
+`DOC/docs/system_design.md` 中部分表名使用单数形式，例如：
 
 ```text
 member

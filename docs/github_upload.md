@@ -5,7 +5,7 @@
 确认当前根目录是：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
+cd "Database_Course_Experiment"
 ```
 
 查看将被 Git 管理的文件：
@@ -25,8 +25,7 @@ git init
 本项目已经提供 `.gitignore`，会忽略：
 
 ```text
-test/build/
-test/build-wsl/
+build/
 .vscode/
 *.exe
 *.o
@@ -40,10 +39,10 @@ test/build-wsl/
 git status --short
 ```
 
-如果看到 `test/build` 或 `test/build-wsl` 出现在待提交列表，说明 `.gitignore` 没生效，需要先执行：
+如果看到 `build/` 出现在待提交列表，说明 `.gitignore` 没生效，需要先执行：
 
 ```bash
-git rm -r --cached test/build test/build-wsl
+git rm -r --cached build
 ```
 
 仅当这些目录已经被 Git 跟踪时才需要执行上面的命令。
@@ -107,7 +106,7 @@ C++17 + Qt6 + PostgreSQL genealogy management system for database course project
 
 当前详细内容已经拆分到：
 
-- `readme.md`
+- `docs/system_design.md`
 - `docs/operation_guide.md`
 - `docs/project_structure.md`
 - `docs/system_framework.md`

@@ -40,4 +40,4 @@ EOF
 fcitx5 -d >/dev/null 2>&1 || true
 
 echo "fcitx5 has been configured with Pinyin."
-echo "Use ./run_wsl.sh to start the Qt app."
+echo "Use ./scripts/run_wsl.sh from the project root to start the Qt app."

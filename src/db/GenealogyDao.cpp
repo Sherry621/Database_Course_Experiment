@@ -98,5 +98,5 @@ bool GenealogyDao::addCollaboratorByUsername(int genealogyId, const QString& use
     query.bindValue(":genealogy_id", genealogyId);
     query.bindValue(":username", username);
     query.bindValue(":role", role);
-    return query.exec();
+    return query.exec() && query.numRowsAffected() > 0;
 }

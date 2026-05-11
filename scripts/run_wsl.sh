@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cd "$(dirname "$0")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${SCRIPT_DIR}/.."
 
 export QT_IM_MODULE=fcitx
 export GTK_IM_MODULE=fcitx
@@ -17,4 +18,9 @@ fi
 export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/mnt/wslg/runtime-dir}"
 
-exec ./build-wsl/GenealogySystem
+if [[ ! -x ./build/GenealogySystem ]]; then
+  echo "Missing ./build/GenealogySystem. Run: cmake -S . -B build -G Ninja && cmake --build build" >&2
+  exit 1
+fi
+
+exec ./build/GenealogySystem

@@ -1,8 +1,6 @@
 # Build outputs
 build/
 build-*/
-test/build/
-test/build-wsl/
 cmake-build-*/
 CMakeFiles/
 CMakeCache.txt

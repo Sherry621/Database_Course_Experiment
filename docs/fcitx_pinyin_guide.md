@@ -8,7 +8,7 @@
 系统：Windows 11 + WSL2 Ubuntu
 界面：Qt6 Widgets
 输入法：fcitx5 + pinyin
-程序：test/build-wsl/GenealogySystem
+程序：build/GenealogySystem
 ```
 
 ## 1. 问题表现
@@ -58,15 +58,15 @@ fc-cache -fv
 项目已经提供脚本：
 
 ```text
-test/setup_fcitx_wsl.sh
+scripts/setup_fcitx_wsl.sh
 ```
 
 执行：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
-chmod +x setup_fcitx_wsl.sh run_wsl.sh
-./setup_fcitx_wsl.sh
+cd "Database_Course_Experiment"
+chmod +x scripts/setup_fcitx_wsl.sh scripts/run_wsl.sh
+./scripts/setup_fcitx_wsl.sh
 ```
 
 脚本会完成：
@@ -109,7 +109,7 @@ DefaultIM=keyboard-us
 说明配置没有生效。重新执行：
 
 ```bash
-./setup_fcitx_wsl.sh
+./scripts/setup_fcitx_wsl.sh
 ```
 
 ## 5. 加载输入法环境变量
@@ -151,15 +151,15 @@ pgrep -a fcitx5
 不要直接运行：
 
 ```bash
-./build-wsl/GenealogySystem
+./build/GenealogySystem
 ```
 
 应该使用项目提供的启动脚本：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
-cmake --build build-wsl
-./run_wsl.sh
+cd "Database_Course_Experiment"
+cmake --build build
+./scripts/run_wsl.sh
 ```
 
 `run_wsl.sh` 会在启动程序前设置：
@@ -204,7 +204,7 @@ QT_IM_MODULE=fcitx \
 XMODIFIERS=@im=fcitx \
 GTK_IM_MODULE=fcitx \
 XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir \
-./build-wsl/GenealogySystem
+./build/GenealogySystem
 ```
 
 ## 9. 诊断命令
@@ -240,7 +240,7 @@ cd & 'C:\Users\Sherry Peng\OneDrive\桌面\shujuku'
 WSL 正确写法：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku/test"
+cd "Database_Course_Experiment"
 ```
 
 ### 10.2 profile 被 fcitx5 覆盖回 keyboard-us
@@ -255,7 +255,7 @@ DefaultIM=keyboard-us
 
 ```bash
 pkill -x fcitx5 || true
-./setup_fcitx_wsl.sh
+./scripts/setup_fcitx_wsl.sh
 ```
 
 ### 10.3 当前 shell 环境变量为空
@@ -273,4 +273,4 @@ echo $XMODIFIERS
 source ~/.xprofile
 ```
 
-但即使当前 shell 为空，只要用 `./run_wsl.sh` 启动程序，脚本也会为 Qt 程序设置这些变量。
+但即使当前 shell 为空，只要用 `./scripts/run_wsl.sh` 启动程序，脚本也会为 Qt 程序设置这些变量。
