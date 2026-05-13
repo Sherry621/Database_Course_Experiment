@@ -32,9 +32,11 @@ docs/system_design.md
 docs/system_framework.md
 docs/usage.md
 docs/data_and_tests.md
+docs/report_materials.md
 docs/planning_and_work.md
 docs/project_structure.md
 docs/github_upload.md
+docs/acceptance_checklist.md
 ```
 
 ## 3. src 目录
@@ -66,10 +68,12 @@ tests/stage2_smoke.cpp
 ```text
 scripts/run_wsl.sh
 scripts/setup_fcitx_wsl.sh
+scripts/check_chinese_input.sh
 ```
 
 - `run_wsl.sh`：从项目根目录启动 `build/GenealogySystem`。
 - `setup_fcitx_wsl.sh`：配置 WSLg 下的 fcitx5 拼音输入法。
+- `check_chinese_input.sh`：检查 fcitx5、Qt6 输入法插件和当前输入法环境。
 
 ## 6. 不应上传的目录
 
