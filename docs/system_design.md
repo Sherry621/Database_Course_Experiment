@@ -1,153 +1,140 @@
-# 寻根溯源族谱管理系统
+# 系统设计说明
 
-本项目是数据库课程设计项目《“寻根溯源”族谱管理系统设计与实现》的系统框架实现，采用 C++17、Qt6 Widgets 和 PostgreSQL 构建桌面端族谱管理应用。
+本文档说明《寻根溯源族谱管理系统》的总体设计。详细 ER 图、关系模型、主外键约束和 3NF/BCNF 分析见 `docs/report_materials.md`。
 
-系统围绕族谱管理场景设计，支持用户登录注册、族谱数据管理、成员管理、树形预览、祖先查询、亲缘链路查询、递归 SQL、索引优化和课程报告材料整理。
+## 1. 系统目标
 
-## 技术栈
+系统面向族谱资料的录入、维护、查询和展示，核心目标包括：
+
+```text
+用户注册与登录
+族谱创建、编辑、删除和协作访问
+成员信息维护
+亲子关系和婚姻关系维护
+Dashboard 统计展示
+后代树形预览
+祖先递归查询
+成员亲缘链路查询
+大规模数据导入、分支导出和索引性能分析
+```
+
+## 2. 技术架构
+
+```text
+Qt Widgets UI
+    |
+Service 业务层
+    |
+DAO 数据访问层
+    |
+Qt SQL / PostgreSQL
+    |
+SQL 表结构、索引、触发器、递归查询
+```
+
+技术栈：
 
 - C++17
 - Qt6 Widgets
 - Qt SQL
 - PostgreSQL
-- CMake
-- Ninja
+- CMake + Ninja
 - WSL2 Ubuntu 24.04
 
-## 当前功能
-
-已完成系统基础框架：
-
-- 用户注册与登录
-- PostgreSQL 数据库连接
-- 登录后加载当前用户可访问的族谱
-- Dashboard 基础统计
-- 成员列表展示
-- 成员姓名模糊查询
-- 新增成员
-- 后代树形预览
-- 祖先递归查询
-- 两个成员之间亲缘链路 BFS 查询
-- 数据库建表、索引、触发器和核心查询 SQL
-
-待继续完善：
-
-- 族谱新增、编辑、删除界面
-- 成员编辑、删除界面
-- 亲子关系维护界面
-- 婚姻关系维护界面
-- 10 万级模拟数据生成工具
-- 数据导入导出脚本
-- EXPLAIN ANALYZE 性能测试截图整理
-
-## 目录结构
+## 3. 目录结构
 
 ```text
 .
 ├── README.md
-├── readme.md
-├── operation.md
-├── work.md
+├── CMakeLists.txt
 ├── docs/
-│   ├── system_framework.md
-│   ├── operation_guide.md
-│   ├── project_structure.md
-│   └── github_upload.md
 ├── sql/
-│   ├── 01_schema.sql
-│   ├── 02_indexes.sql
-│   ├── 03_triggers.sql
-│   └── 04_core_queries.sql
-└── test/
-    ├── CMakeLists.txt
-    ├── main.cpp
-    ├── db/
-    ├── model/
-    ├── service/
-    └── ui/
+├── src/
+├── tests/
+├── tools/
+└── scripts/
 ```
 
-说明：
+关键目录职责：
 
-- `README.md`：GitHub 仓库首页说明。
-- `readme.md`：课程设计完整方案说明。
-- `operation.md`：原始环境配置说明。
-- `work.md`：两人合作分工方案。
-- `docs/`：运行、结构、上传和系统框架文档。
-- `sql/`：PostgreSQL 数据库脚本。
-- `test/`：Qt/C++ 项目源码。
+- `src/db/`：数据库连接管理和 DAO。
+- `src/model/`：用户、族谱、成员等数据模型。
+- `src/service/`：认证、统计、树形结构和亲缘链路业务逻辑。
+- `src/ui/`：Qt Widgets 界面。
+- `sql/`：建表、索引、触发器、核心查询、导入导出和性能分析脚本。
+- `tests/`：自动验收程序。
+- `tools/`：10 万级模拟数据生成工具。
+- `scripts/`：WSL 启动和中文输入法辅助脚本。
 
-## 数据库设计
+## 4. 数据库设计概览
 
-当前 SQL 使用复数表名，主要表包括：
+主要数据表：
 
-- `users`：用户表
-- `genealogies`：族谱表
-- `genealogy_collaborators`：族谱协作者表
-- `members`：成员表
-- `parent_child_relations`：亲子关系表
-- `marriages`：婚姻关系表
+- `users`：系统用户。
+- `genealogies`：族谱基本信息。
+- `genealogy_collaborators`：族谱协作者关系。
+- `members`：族谱成员。
+- `parent_child_relations`：亲子关系。
+- `marriages`：婚姻关系。
 
-数据库脚本：
+设计原则：
 
-- `sql/01_schema.sql`：建表脚本
-- `sql/02_indexes.sql`：索引脚本
-- `sql/03_triggers.sql`：触发器脚本
-- `sql/04_core_queries.sql`：课程要求核心查询
+- 用户、族谱、成员使用代理主键，便于程序引用。
+- 协作者表使用复合主键 `(genealogy_id, user_id)` 表达多对多关系。
+- 亲子关系和婚姻关系拆为独立关系表，避免在成员表中存储非原子列表。
+- 亲子、婚姻表保留 `genealogy_id`，便于按族谱过滤和级联管理，并通过触发器保证与成员所属族谱一致。
+- SQL 标准以 `sql/01_schema.sql` 为准。
 
-## 环境准备
+## 5. 业务模块
 
-在 WSL Ubuntu 中安装依赖：
+### 用户与权限
+
+用户可以注册和登录。系统加载当前用户创建的族谱，以及协作者表中授权访问的族谱。协作者角色分为 `editor` 和 `viewer`，用于支持后续更细粒度的权限控制。
+
+### 族谱管理
+
+族谱模块支持新增、编辑、删除和邀请协作者。删除族谱时，数据库通过外键级联删除相关成员、关系和协作者记录。
+
+### 成员管理
+
+成员模块支持新增、编辑、删除、详情查看和姓名模糊查询。数据库约束保证性别、出生年份、死亡年份和世代字段的基本合法性。
+
+### 关系维护
+
+亲子关系表记录父亲或母亲关系，触发器检查父母性别、世代、出生年份和族谱一致性。婚姻关系表记录夫妻关系，触发器统一双方 ID 顺序，避免重复。
+
+### 查询与展示
+
+系统支持 Dashboard 统计、后代树形预览、祖先递归查询和两个成员之间的亲缘链路查询。递归查询和链路查询体现数据库课程实验中对层次数据和关系路径的处理。
+
+## 6. 数据工程
+
+项目提供 `tools/generate_data.py` 生成 10 万级 CSV 数据，并通过 `sql/08_load_generated_csv.sql` 使用 PostgreSQL `COPY` 批量导入。
+
+导出和性能脚本：
+
+- `sql/09_export_branch.sql`：按成员根节点导出分支数据。
+- `sql/10_performance_explain.sql`：对核心查询执行 `EXPLAIN ANALYZE`，用于索引效果分析。
+
+## 7. 构建与运行
+
+从项目根目录构建：
 
 ```bash
-sudo apt-get update
-sudo apt-get install -y \
-  build-essential \
-  cmake \
-  ninja-build \
-  gdb \
-  pkg-config \
-  qt6-base-dev \
-  qt6-tools-dev \
-  qt6-tools-dev-tools \
-  libqt6sql6-psql \
-  postgresql \
-  postgresql-16 \
-  postgresql-contrib \
-  libpq-dev \
-  fonts-noto-cjk \
-  fonts-wqy-microhei
-```
-
-启动 PostgreSQL：
-
-```bash
-sudo service postgresql start
-pg_isready
-```
-
-## 初始化数据库
-
-创建数据库用户和数据库：
-
-```bash
-sudo -u postgres psql
-```
-
-```sql
-CREATE USER genealogy_user WITH PASSWORD 'genealogy_pass';
-CREATE DATABASE genealogy_lab OWNER genealogy_user;
-\q
-```
-
-执行初始化脚本：
-
-```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
-
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
-
 cmake -S . -B build -G Ninja
 cmake --build build
-./build/GenealogySystem
+```
+
+运行程序：
+
+```bash
 ./scripts/run_wsl.sh
+```
+
+运行自动验收：
+
+```bash
+./build/Stage2Smoke
+```
+
+完整环境配置、数据库初始化和中文输入说明见 `docs/usage.md`。

@@ -32,9 +32,11 @@ docs/system_design.md
 docs/system_framework.md
 docs/usage.md
 docs/data_and_tests.md
+docs/report_materials.md
 docs/planning_and_work.md
 docs/project_structure.md
 docs/github_upload.md
+docs/acceptance_checklist.md
 ```
 
 ## 3. src 目录

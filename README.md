@@ -38,10 +38,10 @@
 - COPY 批量导入脚本
 - 分支导出脚本
 - EXPLAIN ANALYZE 性能测试脚本
+- ER 图、关系模型、3NF/BCNF 分析
 
 待继续完善：
 
-- ER 图、关系模型、3NF/BCNF 分析
 - 实验报告截图与最终演示材料整理
 
 ## 目录结构
@@ -55,9 +55,11 @@
 │   ├── system_framework.md
 │   ├── usage.md
 │   ├── data_and_tests.md
+│   ├── report_materials.md
 │   ├── planning_and_work.md
 │   ├── project_structure.md
-│   └── github_upload.md
+│   ├── github_upload.md
+│   └── acceptance_checklist.md
 ├── sql/
 │   ├── 01_schema.sql
 │   ├── 02_indexes.sql
@@ -85,8 +87,11 @@
 - `docs/system_design.md`：课程设计完整方案说明。
 - `docs/usage.md`：环境配置、数据库初始化、编译运行和中文输入说明。
 - `docs/data_and_tests.md`：阶段验收、10 万数据、导入导出和性能测试结果。
+- `docs/report_materials.md`：ER 图、关系模型、主外键、3NF/BCNF 和报告截图建议。
 - `docs/planning_and_work.md`：实现路线、演示顺序和两人分工建议。
-- `docs/`：运行、结构、上传和系统框架文档。
+- `docs/project_structure.md`：项目目录结构说明。
+- `docs/github_upload.md`：GitHub 上传步骤。
+- `docs/acceptance_checklist.md`：最终验收检查清单。
 - `sql/`：PostgreSQL 数据库脚本。
 - `src/`：Qt/C++ 主程序源码。
 - `tests/`：自动验收和测试程序。
@@ -303,6 +308,7 @@ sudo apt-get install -y fcitx5 fcitx5-chinese-addons fcitx5-frontend-qt6
 - [系统框架说明](docs/system_framework.md)
 - [使用与环境配置](docs/usage.md)
 - [数据工程与阶段验收](docs/data_and_tests.md)
+- [报告材料：ER 图、关系模型与范式分析](docs/report_materials.md)
 - [实现路线与分工](docs/planning_and_work.md)
 - [文件结构说明](docs/project_structure.md)
 - [GitHub 上传步骤](docs/github_upload.md)

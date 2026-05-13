@@ -20,14 +20,12 @@ Dashboard
 COPY 导入
 分支导出
 EXPLAIN 性能对比
+ER 图、关系模型、3NF/BCNF 分析
 ```
 
 待完成：
 
 ```text
-ER 图
-关系模型说明
-3NF/BCNF 分析
 最终实验报告截图和排版
 ```
 
@@ -54,8 +52,8 @@ Dashboard
 
 ```text
 数据库设计
-ER 图和关系模式
-范式分析
+ER 图和关系模式校对
+范式分析校对
 SQL 查询
 数据生成
 COPY 导入导出

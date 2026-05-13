@@ -5,7 +5,7 @@
 确认当前根目录是：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
+cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
 ```
 
 查看将被 Git 管理的文件：
@@ -109,6 +109,7 @@ C++17 + Qt6 + PostgreSQL genealogy management system for database course project
 - `docs/system_design.md`
 - `docs/usage.md`
 - `docs/data_and_tests.md`
+- `docs/report_materials.md`
 - `docs/planning_and_work.md`
 - `docs/project_structure.md`
 - `docs/system_framework.md`
