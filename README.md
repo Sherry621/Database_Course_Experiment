@@ -86,6 +86,7 @@
 - `README.md`：GitHub 仓库首页说明。
 - `docs/system_design.md`：课程设计完整方案说明。
 - `docs/usage.md`：环境配置、数据库初始化、编译运行和中文输入说明。
+- `docs/chinese_input_guide.md`：Qt 图形界面中文显示与拼音输入完整配置方案。
 - `docs/data_and_tests.md`：阶段验收、10 万数据、导入导出和性能测试结果。
 - `docs/report_materials.md`：ER 图、关系模型、主外键、3NF/BCNF 和报告截图建议。
 - `docs/planning_and_work.md`：实现路线、演示顺序和两人分工建议。
