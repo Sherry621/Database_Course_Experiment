@@ -10,13 +10,14 @@
 #include "service/TreeService.h"
 
 class QComboBox;
+class QGraphicsScene;
+class QGraphicsView;
 class QLabel;
 class QLineEdit;
 class QListWidget;
 class QStackedWidget;
 class QTableWidget;
 class QTreeWidget;
-class QTreeWidgetItem;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -54,7 +55,12 @@ private:
     QWidget* buildRelationPage();
     int currentGenealogyId() const;
     int selectedMemberId() const;
-    void appendTreeChildren(QTreeWidgetItem* parentItem, int memberId, int depth, int maxDepth);
+    qreal descendantSubtreeWidth(int memberId, int depth, int maxDepth) const;
+    qreal drawDescendantNode(const Member& member, qreal left, qreal top, int depth, int maxDepth);
+    void drawMemberCard(const Member& member, qreal centerX, qreal top);
+    void drawLimitCard(qreal centerX, qreal top);
+    void drawRelationPathCard(const Member& member, qreal left, qreal top, bool isStart, bool isEnd);
+    void drawRelationArrow(qreal fromX, qreal y, qreal toX);
 
     User user_;
     GenealogyDao genealogyDao_;
@@ -70,7 +76,8 @@ private:
     QLabel* genealogyInfoLabel_ = nullptr;
     QTableWidget* recentMembersTable_ = nullptr;
     QTableWidget* memberTable_ = nullptr;
-    QTreeWidget* treeWidget_ = nullptr;
+    QGraphicsView* descendantTreeView_ = nullptr;
+    QGraphicsScene* descendantTreeScene_ = nullptr;
     QLineEdit* memberSearchEdit_ = nullptr;
     QLineEdit* parentIdEdit_ = nullptr;
     QLineEdit* childIdEdit_ = nullptr;
@@ -87,4 +94,6 @@ private:
     QLineEdit* relationAEdit_ = nullptr;
     QLineEdit* relationBEdit_ = nullptr;
     QLabel* relationResultLabel_ = nullptr;
+    QGraphicsView* relationPathView_ = nullptr;
+    QGraphicsScene* relationPathScene_ = nullptr;
 };

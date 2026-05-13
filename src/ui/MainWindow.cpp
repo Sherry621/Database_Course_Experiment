@@ -1,7 +1,12 @@
 #include "MainWindow.h"
 
+#include <algorithm>
+
 #include <QComboBox>
 #include <QFormLayout>
+#include <QGraphicsScene>
+#include <QGraphicsTextItem>
+#include <QGraphicsView>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -11,6 +16,9 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QMessageBox>
+#include <QPainter>
+#include <QPainterPath>
+#include <QPolygonF>
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QTableWidget>
@@ -21,6 +29,14 @@
 #include "ui/MemberDialog.h"
 
 namespace {
+constexpr qreal NodeWidth = 150.0;
+constexpr qreal NodeHeight = 56.0;
+constexpr qreal HorizontalGap = 36.0;
+constexpr qreal VerticalGap = 112.0;
+constexpr qreal RelationCardWidth = 156.0;
+constexpr qreal RelationCardHeight = 64.0;
+constexpr qreal RelationGap = 74.0;
+
 bool parsePositiveInt(const QLineEdit* edit, const QString& fieldName, int& value, QString& error) {
     bool ok = false;
     value = edit->text().trimmed().toInt(&ok);
@@ -286,12 +302,16 @@ QWidget* MainWindow::buildTreePage() {
     toolbar->addWidget(treeDepthEdit_);
     toolbar->addWidget(buildButton);
 
-    treeWidget_ = new QTreeWidget(page);
-    treeWidget_->setHeaderLabel("后代分支");
+    descendantTreeScene_ = new QGraphicsScene(page);
+    descendantTreeView_ = new QGraphicsView(descendantTreeScene_, page);
+    descendantTreeView_->setRenderHint(QPainter::Antialiasing, true);
+    descendantTreeView_->setDragMode(QGraphicsView::ScrollHandDrag);
+    descendantTreeView_->setAlignment(Qt::AlignCenter);
+    descendantTreeView_->setMinimumHeight(420);
 
     auto* layout = new QVBoxLayout(page);
     layout->addLayout(toolbar);
-    layout->addWidget(treeWidget_);
+    layout->addWidget(descendantTreeView_);
     return page;
 }
 
@@ -330,6 +350,13 @@ QWidget* MainWindow::buildRelationPage() {
     relationResultLabel_->setWordWrap(true);
     relationResultLabel_->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
+    relationPathScene_ = new QGraphicsScene(page);
+    relationPathView_ = new QGraphicsView(relationPathScene_, page);
+    relationPathView_->setRenderHint(QPainter::Antialiasing, true);
+    relationPathView_->setDragMode(QGraphicsView::ScrollHandDrag);
+    relationPathView_->setMinimumHeight(260);
+    relationPathView_->setAlignment(Qt::AlignCenter);
+
     auto* form = new QFormLayout();
     form->addRow("成员 A", relationAEdit_);
     form->addRow("成员 B", relationBEdit_);
@@ -338,6 +365,7 @@ QWidget* MainWindow::buildRelationPage() {
     layout->addLayout(form);
     layout->addWidget(queryButton);
     layout->addWidget(relationResultLabel_);
+    layout->addWidget(relationPathView_);
     layout->addStretch();
     return page;
 }
@@ -646,7 +674,7 @@ void MainWindow::addMarriageRelation() {
 }
 
 void MainWindow::buildTreePreview() {
-    treeWidget_->clear();
+    descendantTreeScene_->clear();
     QString error;
     int rootId = 0;
     if (!parsePositiveInt(treeRootEdit_, "根成员 ID", rootId, error)) {
@@ -667,10 +695,11 @@ void MainWindow::buildTreePreview() {
         return;
     }
 
-    auto* rootItem = new QTreeWidgetItem(QStringList(root->name + QString(" ID:%1").arg(root->memberId)));
-    treeWidget_->addTopLevelItem(rootItem);
-    appendTreeChildren(rootItem, rootId, 0, maxDepth);
-    treeWidget_->expandAll();
+    const qreal treeWidth = descendantSubtreeWidth(rootId, 0, maxDepth);
+    drawDescendantNode(*root, 0.0, 20.0, 0, maxDepth);
+    descendantTreeScene_->setSceneRect(descendantTreeScene_->itemsBoundingRect().adjusted(-80, -60, 80, 80));
+    descendantTreeView_->fitInView(descendantTreeScene_->sceneRect(), Qt::KeepAspectRatio);
+    descendantTreeView_->centerOn(treeWidth / 2.0, 20.0);
 }
 
 void MainWindow::queryAncestors() {
@@ -689,6 +718,7 @@ void MainWindow::queryAncestors() {
 }
 
 void MainWindow::queryRelationPath() {
+    relationPathScene_->clear();
     QString error;
     int memberA = 0;
     int memberB = 0;
@@ -705,14 +735,48 @@ void MainWindow::queryRelationPath() {
 
     if (path.empty()) {
         relationResultLabel_->setText("未找到亲缘链路。");
+        auto* text = relationPathScene_->addText("未找到两名成员之间的亲缘链路");
+        QFont font = text->font();
+        font.setPointSize(12);
+        font.setBold(true);
+        text->setFont(font);
+        text->setDefaultTextColor(QColor("#52606D"));
+        text->setPos(24.0, 24.0);
+        relationPathScene_->setSceneRect(relationPathScene_->itemsBoundingRect().adjusted(-40, -40, 40, 40));
         return;
     }
 
     QStringList parts;
+    std::vector<Member> members;
     for (int memberId : path) {
-        parts << memberLabel(memberDao_.findById(memberId), memberId);
+        const auto member = memberDao_.findById(memberId);
+        parts << memberLabel(member, memberId);
+        if (member.has_value()) {
+            members.push_back(*member);
+        }
     }
-    relationResultLabel_->setText("存在亲缘链路：\n" + parts.join(" -> "));
+    relationResultLabel_->setText(QString("存在亲缘链路，共 %1 个节点：\n%2")
+                                      .arg(path.size())
+                                      .arg(parts.join(" -> ")));
+
+    qreal left = 20.0;
+    const qreal top = 56.0;
+    for (int i = 0; i < static_cast<int>(members.size()); ++i) {
+        drawRelationPathCard(members[i],
+                             left,
+                             top,
+                             i == 0,
+                             i == static_cast<int>(members.size()) - 1);
+        if (i < static_cast<int>(members.size()) - 1) {
+            drawRelationArrow(left + RelationCardWidth + 10.0,
+                              top + RelationCardHeight / 2.0,
+                              left + RelationCardWidth + RelationGap - 10.0);
+        }
+        left += RelationCardWidth + RelationGap;
+    }
+
+    relationPathScene_->setSceneRect(relationPathScene_->itemsBoundingRect().adjusted(-40, -50, 40, 50));
+    relationPathView_->fitInView(relationPathScene_->sceneRect(), Qt::KeepAspectRatio);
 }
 
 int MainWindow::currentGenealogyId() const {
@@ -726,18 +790,153 @@ int MainWindow::selectedMemberId() const {
     return memberTable_->item(memberTable_->currentRow(), 0)->text().toInt();
 }
 
-void MainWindow::appendTreeChildren(QTreeWidgetItem* parentItem, int memberId, int depth, int maxDepth) {
+qreal MainWindow::descendantSubtreeWidth(int memberId, int depth, int maxDepth) const {
     if (depth >= maxDepth) {
-        if (!treeService_.getChildren(memberId).empty()) {
-            parentItem->addChild(new QTreeWidgetItem(QStringList("... 已达到显示层数限制")));
-        }
-        return;
+        return NodeWidth;
     }
 
-    for (const auto& child : treeService_.getChildren(memberId)) {
-        auto* item = new QTreeWidgetItem(QStringList(
-            QString("%1 ID:%2 第%3代").arg(child.name).arg(child.memberId).arg(child.generation)));
-        parentItem->addChild(item);
-        appendTreeChildren(item, child.memberId, depth + 1, maxDepth);
+    const auto children = treeService_.getChildren(memberId);
+    if (children.empty()) {
+        return NodeWidth;
     }
+
+    qreal width = 0.0;
+    for (const auto& child : children) {
+        if (width > 0.0) {
+            width += HorizontalGap;
+        }
+        width += descendantSubtreeWidth(child.memberId, depth + 1, maxDepth);
+    }
+    return std::max(NodeWidth, width);
+}
+
+qreal MainWindow::drawDescendantNode(const Member& member, qreal left, qreal top, int depth, int maxDepth) {
+    const qreal subtreeWidth = descendantSubtreeWidth(member.memberId, depth, maxDepth);
+    const qreal centerX = left + subtreeWidth / 2.0;
+    drawMemberCard(member, centerX, top);
+
+    const auto children = treeService_.getChildren(member.memberId);
+    if (children.empty()) {
+        return subtreeWidth;
+    }
+
+    const qreal childTop = top + VerticalGap;
+    if (depth >= maxDepth) {
+        drawLimitCard(centerX, childTop);
+        descendantTreeScene_->addLine(centerX,
+                                      top + NodeHeight,
+                                      centerX,
+                                      childTop,
+                                      QPen(QColor("#7A8794"), 2));
+        return subtreeWidth;
+    }
+
+    qreal childLeft = left;
+    for (const auto& child : children) {
+        const qreal childWidth = descendantSubtreeWidth(child.memberId, depth + 1, maxDepth);
+        const qreal childCenterX = childLeft + childWidth / 2.0;
+        descendantTreeScene_->addLine(centerX,
+                                      top + NodeHeight,
+                                      childCenterX,
+                                      childTop,
+                                      QPen(QColor("#7A8794"), 2));
+        drawDescendantNode(child, childLeft, childTop, depth + 1, maxDepth);
+        childLeft += childWidth + HorizontalGap;
+    }
+
+    return subtreeWidth;
+}
+
+void MainWindow::drawMemberCard(const Member& member, qreal centerX, qreal top) {
+    const QRectF rect(centerX - NodeWidth / 2.0, top, NodeWidth, NodeHeight);
+    const QColor border = member.gender == 'F' ? QColor("#C94F7C") : QColor("#2F6FAE");
+    const QColor fill = member.gender == 'F' ? QColor("#FFF1F6") : QColor("#EEF6FF");
+
+    QPainterPath path;
+    path.addRoundedRect(rect, 8, 8);
+    descendantTreeScene_->addPath(path, QPen(border, 2), QBrush(fill));
+
+    auto* nameText = descendantTreeScene_->addText(member.name);
+    QFont nameFont = nameText->font();
+    nameFont.setBold(true);
+    nameFont.setPointSize(10);
+    nameText->setFont(nameFont);
+    nameText->setDefaultTextColor(QColor("#1F2933"));
+    nameText->setTextWidth(NodeWidth - 16.0);
+    nameText->setPos(rect.left() + 8.0, rect.top() + 6.0);
+
+    auto* detailText = descendantTreeScene_->addText(
+        QString("ID:%1  %2  第%3代")
+            .arg(member.memberId)
+            .arg(genderText(member.gender))
+            .arg(member.generation == 0 ? QString("-") : QString::number(member.generation)));
+    QFont detailFont = detailText->font();
+    detailFont.setPointSize(8);
+    detailText->setFont(detailFont);
+    detailText->setDefaultTextColor(QColor("#4B5563"));
+    detailText->setTextWidth(NodeWidth - 16.0);
+    detailText->setPos(rect.left() + 8.0, rect.top() + 31.0);
+}
+
+void MainWindow::drawLimitCard(qreal centerX, qreal top) {
+    const QRectF rect(centerX - 58.0, top, 116.0, 34.0);
+    QPainterPath path;
+    path.addRoundedRect(rect, 8, 8);
+    descendantTreeScene_->addPath(path,
+                                  QPen(QColor("#9AA5B1"), 1, Qt::DashLine),
+                                  QBrush(QColor("#F5F7FA")));
+    auto* text = descendantTreeScene_->addText("还有下级成员");
+    text->setDefaultTextColor(QColor("#52606D"));
+    text->setTextWidth(rect.width());
+    text->setPos(rect.left() + 8.0, rect.top() + 6.0);
+}
+
+void MainWindow::drawRelationPathCard(const Member& member, qreal left, qreal top, bool isStart, bool isEnd) {
+    const QRectF rect(left, top, RelationCardWidth, RelationCardHeight);
+    const QColor border = isStart ? QColor("#1D8A5A") : (isEnd ? QColor("#B45309") : QColor("#52606D"));
+    const QColor fill = isStart ? QColor("#ECFDF3") : (isEnd ? QColor("#FFF7ED") : QColor("#F8FAFC"));
+
+    QPainterPath path;
+    path.addRoundedRect(rect, 8, 8);
+    relationPathScene_->addPath(path, QPen(border, 2), QBrush(fill));
+
+    const QString badge = isStart ? "起点" : (isEnd ? "终点" : "中间成员");
+    auto* badgeText = relationPathScene_->addText(badge);
+    QFont badgeFont = badgeText->font();
+    badgeFont.setPointSize(8);
+    badgeText->setFont(badgeFont);
+    badgeText->setDefaultTextColor(border);
+    badgeText->setPos(rect.left() + 8.0, rect.top() + 5.0);
+
+    auto* nameText = relationPathScene_->addText(member.name);
+    QFont nameFont = nameText->font();
+    nameFont.setBold(true);
+    nameFont.setPointSize(10);
+    nameText->setFont(nameFont);
+    nameText->setDefaultTextColor(QColor("#1F2933"));
+    nameText->setTextWidth(RelationCardWidth - 16.0);
+    nameText->setPos(rect.left() + 8.0, rect.top() + 24.0);
+
+    auto* detailText = relationPathScene_->addText(
+        QString("ID:%1  %2  第%3代")
+            .arg(member.memberId)
+            .arg(genderText(member.gender))
+            .arg(member.generation == 0 ? QString("-") : QString::number(member.generation)));
+    QFont detailFont = detailText->font();
+    detailFont.setPointSize(8);
+    detailText->setFont(detailFont);
+    detailText->setDefaultTextColor(QColor("#4B5563"));
+    detailText->setTextWidth(RelationCardWidth - 16.0);
+    detailText->setPos(rect.left() + 8.0, rect.top() + 45.0);
+}
+
+void MainWindow::drawRelationArrow(qreal fromX, qreal y, qreal toX) {
+    const QColor color("#64748B");
+    relationPathScene_->addLine(fromX, y, toX, y, QPen(color, 2));
+
+    QPolygonF arrowHead;
+    arrowHead << QPointF(toX, y)
+              << QPointF(toX - 10.0, y - 6.0)
+              << QPointF(toX - 10.0, y + 6.0);
+    relationPathScene_->addPolygon(arrowHead, QPen(color, 2), QBrush(color));
 }
