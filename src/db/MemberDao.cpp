@@ -63,6 +63,30 @@ std::vector<Member> MemberDao::findByGenealogy(int genealogyId, const QString& k
     return result;
 }
 
+std::vector<Member> MemberDao::findRecentByGenealogy(int genealogyId, int limit) const {
+    lastError_.clear();
+    QSqlQuery query(DatabaseManager::instance().database());
+    query.prepare(
+        "SELECT member_id, genealogy_id, name, gender, birth_year, death_year, generation, biography "
+        "FROM members "
+        "WHERE genealogy_id = :genealogy_id "
+        "ORDER BY member_id DESC "
+        "LIMIT :limit");
+    query.bindValue(":genealogy_id", genealogyId);
+    query.bindValue(":limit", limit);
+
+    std::vector<Member> result;
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return result;
+    }
+
+    while (query.next()) {
+        result.push_back(readMember(query));
+    }
+    return result;
+}
+
 std::vector<Member> MemberDao::findChildren(int memberId) const {
     lastError_.clear();
     QSqlQuery query(DatabaseManager::instance().database());

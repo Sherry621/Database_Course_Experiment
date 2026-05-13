@@ -2,6 +2,8 @@
 
 #include <QComboBox>
 #include <QFormLayout>
+#include <QGridLayout>
+#include <QGroupBox>
 #include <QHBoxLayout>
 #include <QHeaderView>
 #include <QInputDialog>
@@ -106,13 +108,53 @@ QWidget* MainWindow::buildDashboardPage() {
     auto* page = new QWidget(this);
     statsLabel_ = new QLabel(page);
     statsLabel_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    statsLabel_->setWordWrap(true);
 
-    auto* refreshButton = new QPushButton("刷新统计", page);
+    auto* statsBox = new QGroupBox("系统概览", page);
+    auto* statsLayout = new QVBoxLayout(statsBox);
+    statsLayout->addWidget(statsLabel_);
+
+    auto* quickBox = new QGroupBox("常用操作", page);
+    auto* addMemberButton = new QPushButton("新增成员", quickBox);
+    auto* treeButton = new QPushButton("查看族谱树", quickBox);
+    auto* relationButton = new QPushButton("亲属关系查询", quickBox);
+    auto* refreshButton = new QPushButton("刷新统计", quickBox);
+    connect(addMemberButton, &QPushButton::clicked, this, [this]() {
+        navigation_->setCurrentRow(2);
+        addMember();
+    });
+    connect(treeButton, &QPushButton::clicked, this, [this]() {
+        navigation_->setCurrentRow(4);
+    });
+    connect(relationButton, &QPushButton::clicked, this, [this]() {
+        navigation_->setCurrentRow(6);
+    });
     connect(refreshButton, &QPushButton::clicked, this, &MainWindow::reloadDashboard);
 
+    auto* quickLayout = new QGridLayout(quickBox);
+    quickLayout->addWidget(addMemberButton, 0, 0);
+    quickLayout->addWidget(treeButton, 0, 1);
+    quickLayout->addWidget(relationButton, 1, 0);
+    quickLayout->addWidget(refreshButton, 1, 1);
+
+    recentMembersTable_ = new QTableWidget(page);
+    recentMembersTable_->setColumnCount(5);
+    recentMembersTable_->setHorizontalHeaderLabels({"ID", "姓名", "性别", "出生年", "代数"});
+    recentMembersTable_->horizontalHeader()->setStretchLastSection(true);
+    recentMembersTable_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    recentMembersTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
+    recentMembersTable_->setSelectionMode(QAbstractItemView::SingleSelection);
+
+    auto* recentBox = new QGroupBox("最近新增成员", page);
+    auto* recentLayout = new QVBoxLayout(recentBox);
+    recentLayout->addWidget(recentMembersTable_);
+
     auto* layout = new QVBoxLayout(page);
-    layout->addWidget(refreshButton);
-    layout->addWidget(statsLabel_);
+    auto* topLayout = new QHBoxLayout();
+    topLayout->addWidget(statsBox, 2);
+    topLayout->addWidget(quickBox, 1);
+    layout->addLayout(topLayout);
+    layout->addWidget(recentBox);
     layout->addStretch();
     return page;
 }
@@ -323,6 +365,9 @@ void MainWindow::reloadDashboard() {
     const int genealogyId = currentGenealogyId();
     if (genealogyId == 0) {
         statsLabel_->setText("当前用户暂无可访问族谱。");
+        if (recentMembersTable_) {
+            recentMembersTable_->setRowCount(0);
+        }
         if (genealogyInfoLabel_) {
             genealogyInfoLabel_->setText("当前用户暂无可访问族谱。");
         }
@@ -342,13 +387,38 @@ void MainWindow::reloadDashboard() {
 
     const auto stats = dashboardService_.loadStats(genealogyId);
     statsLabel_->setText(QString(
-        "家族总人数：%1\n男性人数：%2\n女性人数：%3\n最大代数：%4\n血缘关系数：%5\n婚姻关系数：%6")
+        "当前登录用户：%1（ID：%2）\n"
+        "可访问族谱数量：%3\n"
+        "当前族谱：%4\n"
+        "成员总数：%5\n"
+        "男性人数：%6\n"
+        "女性人数：%7\n"
+        "最大代数：%8\n"
+        "血缘关系数：%9\n"
+        "婚姻关系数：%10")
+        .arg(user_.realName.isEmpty() ? user_.username : user_.realName)
+        .arg(user_.userId)
+        .arg(genealogyCombo_->count())
+        .arg(genealogyCombo_->currentText())
         .arg(stats.totalMembers)
         .arg(stats.maleMembers)
         .arg(stats.femaleMembers)
         .arg(stats.maxGeneration)
         .arg(stats.parentChildRelations)
         .arg(stats.marriages));
+
+    if (recentMembersTable_) {
+        const auto recentMembers = memberDao_.findRecentByGenealogy(genealogyId, 5);
+        recentMembersTable_->setRowCount(static_cast<int>(recentMembers.size()));
+        for (int row = 0; row < static_cast<int>(recentMembers.size()); ++row) {
+            const auto& member = recentMembers[row];
+            recentMembersTable_->setItem(row, 0, new QTableWidgetItem(QString::number(member.memberId)));
+            recentMembersTable_->setItem(row, 1, new QTableWidgetItem(member.name));
+            recentMembersTable_->setItem(row, 2, new QTableWidgetItem(genderText(member.gender)));
+            recentMembersTable_->setItem(row, 3, new QTableWidgetItem(member.birthYear == 0 ? QString() : QString::number(member.birthYear)));
+            recentMembersTable_->setItem(row, 4, new QTableWidgetItem(member.generation == 0 ? QString() : QString::number(member.generation)));
+        }
+    }
 }
 
 void MainWindow::addGenealogy() {
