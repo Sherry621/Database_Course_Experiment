@@ -18,6 +18,9 @@ int main(int argc, char* argv[]) {
     if (env.contains("WSL_DISTRO_NAME") && env.value("GTK_IM_MODULE").trimmed().isEmpty()) {
         qputenv("GTK_IM_MODULE", "fcitx");
     }
+    if (env.contains("WSL_DISTRO_NAME") && env.value("QT_QPA_PLATFORM").trimmed().isEmpty()) {
+        qputenv("QT_QPA_PLATFORM", "xcb");
+    }
 #endif
     QLocale::setDefault(QLocale(QLocale::Chinese, QLocale::China));
 
