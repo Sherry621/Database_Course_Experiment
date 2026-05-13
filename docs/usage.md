@@ -122,10 +122,16 @@ sudo apt-get install -y fcitx5 fcitx5-chinese-addons fcitx5-frontend-qt6
 验证 Qt6 输入法插件：
 
 ```bash
-find /usr/lib -path '*platforminputcontexts*' -type f | sort
+./scripts/check_chinese_input.sh
 ```
 
-应能看到 fcitx 相关 Qt6 插件。当前机器如果只看到 `compose` 和 `ibus`，说明 fcitx Qt6 前端未安装。
+输出中应包含：
+
+```text
+IM_MODULE_CLASSNAME=fcitx::QFcitxPlatformInputContext
+```
+
+如果只看到 `QComposeInputContext`，说明当前启动环境没有让 Qt6 接入 fcitx。此时不要直接运行 `./build/GenealogySystem`，需要用 `./scripts/run_wsl.sh` 启动。
 
 ## 5. 自动验收
 

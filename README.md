@@ -291,10 +291,11 @@ fc-cache -fv
 sudo apt-get update
 sudo apt-get install -y fcitx5 fcitx5-chinese-addons fcitx5-frontend-qt6
 ./scripts/setup_fcitx_wsl.sh
+./scripts/check_chinese_input.sh
 ./scripts/run_wsl.sh
 ```
 
-不要用 Wayland 方式直接启动来测试中文输入；`scripts/run_wsl.sh` 默认使用 `QT_QPA_PLATFORM=xcb`，在 WSLg/XWayland 下更容易让 fcitx5 接管 Qt 输入框。
+`check_chinese_input.sh` 输出中应包含 `IM_MODULE_CLASSNAME=fcitx::QFcitxPlatformInputContext`。不要用 Wayland 方式或 IDE 直接启动来测试中文输入；`scripts/run_wsl.sh` 会强制使用 `QT_QPA_PLATFORM=xcb`，在 WSLg/XWayland 下更容易让 fcitx5 接管 Qt 输入框。
 
 ### QStandardPaths 权限警告
 

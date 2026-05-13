@@ -5,7 +5,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "${SCRIPT_DIR}/.."
 
 # WSLg defaults to Wayland, but Qt6 + fcitx5 is more reliable through XWayland/xcb.
-export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
+# Force xcb here because an inherited Wayland value can make the Qt input method
+# plugin fall back to compose/Wayland input and hide the fcitx candidate window.
+export QT_QPA_PLATFORM=xcb
 export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/mnt/wslg/runtime-dir}"
 export QT_IM_MODULE=fcitx
 export GTK_IM_MODULE=fcitx
@@ -23,6 +25,15 @@ if command -v fcitx5 >/dev/null 2>&1; then
 else
   echo "Warning: fcitx5 is not installed, Chinese input will not work." >&2
   echo "Install: sudo apt-get install -y fcitx5 fcitx5-chinese-addons fcitx5-frontend-qt6" >&2
+fi
+
+if command -v fcitx5-qt6-immodule-probing >/dev/null 2>&1; then
+  probe_output="$(fcitx5-qt6-immodule-probing 2>/dev/null || true)"
+  if ! grep -q "QFcitxPlatformInputContext" <<<"${probe_output}"; then
+    echo "Warning: Qt6 is not using the fcitx input context." >&2
+    echo "${probe_output}" >&2
+    echo "Run ./scripts/check_chinese_input.sh for diagnostics." >&2
+  fi
 fi
 
 if [[ ! -x ./build/GenealogySystem ]]; then
