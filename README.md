@@ -131,6 +131,8 @@ sudo apt-get install -y \
   qt6-tools-dev \
   qt6-tools-dev-tools \
   libqt6sql6-psql \
+  libxkbcommon-dev \
+  libxkbcommon-x11-dev \
   postgresql \
   postgresql-16 \
   postgresql-contrib \
@@ -142,7 +144,7 @@ sudo apt-get install -y \
   fcitx5-frontend-qt6
 ```
 
-`fcitx5`、`fcitx5-chinese-addons` 和 `fcitx5-frontend-qt6` 用于 Qt6 中文输入。缺少这些包时，界面可以显示中文，但输入框中通常无法输入中文。
+`libxkbcommon-dev` 和 `libxkbcommon-x11-dev` 用于补齐 Qt/xcb 的键盘依赖检测。`fcitx5`、`fcitx5-chinese-addons` 和 `fcitx5-frontend-qt6` 用于 Qt6 中文输入。缺少 fcitx5 相关包时，界面可以显示中文，但输入框中通常无法输入中文。
 
 启动 PostgreSQL：
 
@@ -168,7 +170,7 @@ CREATE DATABASE genealogy_lab OWNER genealogy_user;
 执行初始化脚本：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
+cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
 
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/01_schema.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/02_indexes.sql
@@ -207,7 +209,7 @@ VALUES ('张氏族谱', '张', 1, '测试族谱');
 进入项目目录：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
+cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
 ```
 
 使用当前项目下的 `build/` 构建目录：
@@ -224,10 +226,12 @@ cmake --build build
 ./scripts/run_wsl.sh
 ```
 
-如果不需要中文输入，也可以直接运行：
+如果要手动启动并保留中文输入，需要同时设置 fcitx5 相关环境变量：
 
 ```bash
-env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=xcb ./build/GenealogySystem
+env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=xcb \
+  QT_IM_MODULE=fcitx GTK_IM_MODULE=fcitx XMODIFIERS=@im=fcitx \
+  ./build/GenealogySystem
 ```
 
 登录：
@@ -244,6 +248,22 @@ env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=xcb ./build/GenealogyS
 如果出现 Windows 路径和 WSL 路径冲突，不要共用 `build/` 目录。WSL 下使用：
 
 ```bash
+cmake -S . -B build -G Ninja
+cmake --build build
+```
+
+### CMake 提示 Could NOT find XKB
+
+如果配置时出现：
+
+```text
+Could NOT find XKB (missing: XKB_LIBRARY XKB_INCLUDE_DIR)
+```
+
+说明系统缺少 XKB 开发包。它不是“无法输入中文”的直接原因，但建议补齐，否则 Qt/xcb 的键盘依赖检测不完整：
+
+```bash
+sudo apt-get install -y libxkbcommon-dev libxkbcommon-x11-dev
 cmake -S . -B build -G Ninja
 cmake --build build
 ```

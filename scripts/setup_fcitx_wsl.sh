@@ -21,6 +21,12 @@ fi
 
 mkdir -p "${HOME}/.config/fcitx5"
 
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-xcb}"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/mnt/wslg/runtime-dir}"
+export QT_IM_MODULE=fcitx
+export GTK_IM_MODULE=fcitx
+export XMODIFIERS=@im=fcitx
+
 pkill -x fcitx5 >/dev/null 2>&1 || true
 sleep 1
 
@@ -50,12 +56,21 @@ Layout=
 EOF
 
 cat > "${HOME}/.xprofile" <<'EOF'
+export QT_QPA_PLATFORM=xcb
+export XDG_RUNTIME_DIR=${XDG_RUNTIME_DIR:-/mnt/wslg/runtime-dir}
 export QT_IM_MODULE=fcitx
 export GTK_IM_MODULE=fcitx
 export XMODIFIERS=@im=fcitx
 EOF
 
-fcitx5 -d >/dev/null 2>&1 || true
+fcitx5 -d >/tmp/genealogy_fcitx5.log 2>&1 || true
+sleep 1
 
 echo "fcitx5 has been configured with Pinyin."
+if pgrep -x fcitx5 >/dev/null 2>&1; then
+  echo "fcitx5 is running."
+else
+  echo "Warning: fcitx5 did not stay running." >&2
+  echo "Check /tmp/genealogy_fcitx5.log or run: fcitx5-diagnose" >&2
+fi
 echo "Use ./scripts/run_wsl.sh from the project root to start the Qt app."
