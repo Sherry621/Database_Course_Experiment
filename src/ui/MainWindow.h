@@ -68,6 +68,7 @@ private:
     QComboBox* genealogyCombo_ = nullptr;
     QLabel* statsLabel_ = nullptr;
     QLabel* genealogyInfoLabel_ = nullptr;
+    QTableWidget* recentMembersTable_ = nullptr;
     QTableWidget* memberTable_ = nullptr;
     QTreeWidget* treeWidget_ = nullptr;
     QLineEdit* memberSearchEdit_ = nullptr;
