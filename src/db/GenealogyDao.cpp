@@ -141,6 +141,25 @@ bool GenealogyDao::addCollaboratorByUsername(int genealogyId, const QString& use
     return true;
 }
 
+QString GenealogyDao::roleForUser(int genealogyId, int userId) const {
+    lastError_.clear();
+    QSqlQuery query(DatabaseManager::instance().database());
+    query.prepare(
+        "SELECT role FROM genealogy_collaborators "
+        "WHERE genealogy_id = :genealogy_id AND user_id = :user_id");
+    query.bindValue(":genealogy_id", genealogyId);
+    query.bindValue(":user_id", userId);
+
+    if (!query.exec()) {
+        lastError_ = query.lastError().text();
+        return {};
+    }
+    if (!query.next()) {
+        return {};
+    }
+    return query.value("role").toString();
+}
+
 QString GenealogyDao::lastError() const {
     return lastError_;
 }
