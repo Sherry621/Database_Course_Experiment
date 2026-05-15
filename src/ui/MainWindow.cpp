@@ -4,6 +4,7 @@
 
 #include <QComboBox>
 #include <QFormLayout>
+#include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
 #include <QGraphicsView>
@@ -22,6 +23,7 @@
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QTableWidget>
+#include <QTableWidgetItem>
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
@@ -36,6 +38,7 @@ constexpr qreal VerticalGap = 112.0;
 constexpr qreal RelationCardWidth = 156.0;
 constexpr qreal RelationCardHeight = 64.0;
 constexpr qreal RelationGap = 74.0;
+constexpr int MemberIdItemDataKey = 1;
 
 bool parsePositiveInt(const QLineEdit* edit, const QString& fieldName, int& value, QString& error) {
     bool ok = false;
@@ -72,6 +75,31 @@ QString memberLabel(const std::optional<Member>& member, int memberId) {
         return QString("#%1").arg(memberId);
     }
     return QString("%1(#%2)").arg(member->name).arg(member->memberId);
+}
+
+QTableWidgetItem* textItem(const QString& text) {
+    auto* item = new QTableWidgetItem(text);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    return item;
+}
+
+QTableWidgetItem* numberItem(int value) {
+    auto* item = new QTableWidgetItem();
+    item->setData(Qt::DisplayRole, value);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    return item;
+}
+
+QString memberDetailText(const Member& member) {
+    return QString(
+        "ID：%1\n姓名：%2\n性别：%3\n出生年：%4\n死亡年：%5\n代数：%6\n生平简介：%7")
+        .arg(member.memberId)
+        .arg(member.name)
+        .arg(genderText(member.gender))
+        .arg(member.birthYear)
+        .arg(member.deathYear)
+        .arg(member.generation)
+        .arg(member.biography);
 }
 }
 
@@ -235,8 +263,10 @@ QWidget* MainWindow::buildMemberPage() {
     memberTable_->setColumnCount(6);
     memberTable_->setHorizontalHeaderLabels({"ID", "姓名", "性别", "出生年", "死亡年", "代数"});
     memberTable_->horizontalHeader()->setStretchLastSection(true);
+    memberTable_->horizontalHeader()->setSortIndicatorShown(true);
     memberTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
     memberTable_->setSelectionMode(QAbstractItemView::SingleSelection);
+    memberTable_->setSortingEnabled(true);
 
     auto* layout = new QVBoxLayout(page);
     layout->addLayout(toolbar);
@@ -306,6 +336,7 @@ QWidget* MainWindow::buildTreePage() {
     toolbar->addWidget(buildButton);
 
     descendantTreeScene_ = new QGraphicsScene(page);
+    connect(descendantTreeScene_, &QGraphicsScene::selectionChanged, this, &MainWindow::showDescendantNodeDetail);
     descendantTreeView_ = new QGraphicsView(descendantTreeScene_, page);
     descendantTreeView_->setRenderHint(QPainter::Antialiasing, true);
     descendantTreeView_->setDragMode(QGraphicsView::ScrollHandDrag);
@@ -418,23 +449,27 @@ void MainWindow::reloadDashboard() {
     }
 
     const auto stats = dashboardService_.loadStats(genealogyId);
+    const double maleRatio = stats.totalMembers > 0 ? stats.maleMembers * 100.0 / stats.totalMembers : 0.0;
+    const double femaleRatio = stats.totalMembers > 0 ? stats.femaleMembers * 100.0 / stats.totalMembers : 0.0;
     statsLabel_->setText(QString(
         "当前登录用户：%1（ID：%2）\n"
         "可访问族谱数量：%3\n"
         "当前族谱：%4\n"
         "成员总数：%5\n"
-        "男性人数：%6\n"
-        "女性人数：%7\n"
-        "最大代数：%8\n"
-        "血缘关系数：%9\n"
-        "婚姻关系数：%10")
+        "男性人数：%6（%7%）\n"
+        "女性人数：%8（%9%）\n"
+        "最大代数：%10\n"
+        "血缘关系数：%11\n"
+        "婚姻关系数：%12")
         .arg(user_.realName.isEmpty() ? user_.username : user_.realName)
         .arg(user_.userId)
         .arg(genealogyCombo_->count())
         .arg(genealogyCombo_->currentText())
         .arg(stats.totalMembers)
         .arg(stats.maleMembers)
+        .arg(maleRatio, 0, 'f', 1)
         .arg(stats.femaleMembers)
+        .arg(femaleRatio, 0, 'f', 1)
         .arg(stats.maxGeneration)
         .arg(stats.parentChildRelations)
         .arg(stats.marriages));
@@ -539,18 +574,25 @@ void MainWindow::inviteCollaborator() {
 }
 
 void MainWindow::reloadMembers() {
+    const int sortColumn = memberTable_->horizontalHeader()->sortIndicatorSection();
+    const Qt::SortOrder sortOrder = memberTable_->horizontalHeader()->sortIndicatorOrder();
+    memberTable_->setSortingEnabled(false);
+
     const auto members = memberDao_.findByGenealogy(currentGenealogyId(), memberSearchEdit_->text().trimmed());
     memberTable_->setRowCount(static_cast<int>(members.size()));
 
     for (int row = 0; row < static_cast<int>(members.size()); ++row) {
         const auto& member = members[row];
-        memberTable_->setItem(row, 0, new QTableWidgetItem(QString::number(member.memberId)));
-        memberTable_->setItem(row, 1, new QTableWidgetItem(member.name));
-        memberTable_->setItem(row, 2, new QTableWidgetItem(genderText(member.gender)));
-        memberTable_->setItem(row, 3, new QTableWidgetItem(QString::number(member.birthYear)));
-        memberTable_->setItem(row, 4, new QTableWidgetItem(QString::number(member.deathYear)));
-        memberTable_->setItem(row, 5, new QTableWidgetItem(QString::number(member.generation)));
+        memberTable_->setItem(row, 0, numberItem(member.memberId));
+        memberTable_->setItem(row, 1, textItem(member.name));
+        memberTable_->setItem(row, 2, textItem(genderText(member.gender)));
+        memberTable_->setItem(row, 3, numberItem(member.birthYear));
+        memberTable_->setItem(row, 4, numberItem(member.deathYear));
+        memberTable_->setItem(row, 5, numberItem(member.generation));
     }
+
+    memberTable_->setSortingEnabled(true);
+    memberTable_->sortItems(sortColumn, sortOrder);
 }
 
 void MainWindow::addMember() {
@@ -628,15 +670,7 @@ void MainWindow::showMemberDetail() {
         return;
     }
 
-    QMessageBox::information(this, "成员详情", QString(
-        "ID：%1\n姓名：%2\n性别：%3\n出生年：%4\n死亡年：%5\n代数：%6\n生平简介：%7")
-        .arg(member->memberId)
-        .arg(member->name)
-        .arg(genderText(member->gender))
-        .arg(member->birthYear)
-        .arg(member->deathYear)
-        .arg(member->generation)
-        .arg(member->biography));
+    QMessageBox::information(this, "成员详情", memberDetailText(*member));
 }
 
 void MainWindow::addParentChildRelation() {
@@ -824,6 +858,25 @@ void MainWindow::queryRelationPath() {
 
     relationPathScene_->setSceneRect(relationPathScene_->itemsBoundingRect().adjusted(-40, -50, 40, 50));
     relationPathView_->fitInView(relationPathScene_->sceneRect(), Qt::KeepAspectRatio);
+}
+
+void MainWindow::showDescendantNodeDetail() {
+    const auto selectedItems = descendantTreeScene_->selectedItems();
+    for (QGraphicsItem* item : selectedItems) {
+        const QVariant memberIdData = item->data(MemberIdItemDataKey);
+        if (!memberIdData.isValid()) {
+            continue;
+        }
+
+        const auto member = memberDao_.findById(memberIdData.toInt());
+        descendantTreeScene_->clearSelection();
+        if (!member.has_value()) {
+            QMessageBox::warning(this, "查看失败", "未找到该成员。");
+            return;
+        }
+        QMessageBox::information(this, "成员详情", memberDetailText(*member));
+        return;
+    }
 }
 
 QString MainWindow::currentAccessRole() const {
@@ -1015,7 +1068,9 @@ void MainWindow::drawMemberCard(const Member& member, qreal centerX, qreal top) 
 
     QPainterPath path;
     path.addRoundedRect(rect, 8, 8);
-    descendantTreeScene_->addPath(path, QPen(border, 2), QBrush(fill));
+    auto* cardItem = descendantTreeScene_->addPath(path, QPen(border, 2), QBrush(fill));
+    cardItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
+    cardItem->setData(MemberIdItemDataKey, member.memberId);
 
     auto* nameText = descendantTreeScene_->addText(member.name);
     QFont nameFont = nameText->font();
@@ -1025,6 +1080,8 @@ void MainWindow::drawMemberCard(const Member& member, qreal centerX, qreal top) 
     nameText->setDefaultTextColor(QColor("#1F2933"));
     nameText->setTextWidth(NodeWidth - 16.0);
     nameText->setPos(rect.left() + 8.0, rect.top() + 6.0);
+    nameText->setFlag(QGraphicsItem::ItemIsSelectable, true);
+    nameText->setData(MemberIdItemDataKey, member.memberId);
 
     auto* detailText = descendantTreeScene_->addText(
         QString("ID:%1  %2  第%3代")
@@ -1037,6 +1094,8 @@ void MainWindow::drawMemberCard(const Member& member, qreal centerX, qreal top) 
     detailText->setDefaultTextColor(QColor("#4B5563"));
     detailText->setTextWidth(NodeWidth - 16.0);
     detailText->setPos(rect.left() + 8.0, rect.top() + 31.0);
+    detailText->setFlag(QGraphicsItem::ItemIsSelectable, true);
+    detailText->setData(MemberIdItemDataKey, member.memberId);
 }
 
 void MainWindow::drawLimitCard(qreal centerX, qreal top) {

@@ -44,6 +44,7 @@ private slots:
     void buildTreePreview();
     void queryAncestors();
     void queryRelationPath();
+    void showDescendantNodeDetail();
 
 private:
     void buildUi();
