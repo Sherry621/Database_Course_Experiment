@@ -7,7 +7,7 @@
 在 WSL 终端执行：
 
 ```bash
-cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 qmake6 --version
 cmake --version
 ninja --version
