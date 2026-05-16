@@ -317,6 +317,7 @@ sudo apt-get install -y fcitx5 fcitx5-chinese-addons fcitx5-frontend-qt6
 - [验收检查清单](docs/acceptance_checklist.md)
 - [最终验收资料包](docs/final_acceptance_package.md)
 - [项目文件结构与关键代码实现原理](docs/code_structure_and_principles.md)
+- [SQL 语句代码详细解析](docs/sql_code_analysis.md)
 
 ## 分工建议
 
