@@ -61,6 +61,12 @@ parent_child_relations=189350
 marriages=12476
 ```
 
+亲缘关系覆盖验证：
+
+```text
+每个族谱 isolated_members=0
+```
+
 ## 4. COPY 导入
 
 执行：

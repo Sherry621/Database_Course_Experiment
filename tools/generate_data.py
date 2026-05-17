@@ -135,8 +135,16 @@ def generate_genealogy(
                 current_females.append(member_id)
 
             if previous_males and previous_females:
-                father_id = random.choice(previous_males)
-                mother_id = random.choice(previous_females)
+                father_id = (
+                    previous_males[offset % len(previous_males)]
+                    if offset < len(previous_males)
+                    else random.choice(previous_males)
+                )
+                mother_id = (
+                    previous_females[offset % len(previous_females)]
+                    if offset < len(previous_females)
+                    else random.choice(previous_females)
+                )
                 relations.append(
                     {
                         "relation_id": relation_id,

@@ -22,7 +22,7 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -
 
 | 文件 | 用途 | 是否仍使用 |
 | --- | --- | --- |
-| `04_core_queries.sql` | 课程要求的核心 SQL 模板：配偶及子女、递归祖先、平均寿命最长代、50 岁以上无配偶男性、早于同辈平均出生年份成员。 | 报告使用 |
+| `04_core_queries.sql` | 配偶及子女、递归祖先、平均寿命最长代、50 岁以上无配偶男性、早于同辈平均出生年份成员。 | 报告使用 |
 
 注意：`04_core_queries.sql` 中使用 `:member_id`、`:genealogy_id` 这类 psql 变量占位。截图时可以在 psql 中传变量，或复制单条 SQL 后替换成具体 ID。
 
