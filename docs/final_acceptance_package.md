@@ -1,6 +1,6 @@
 # 最终验收资料包
 
-本文档用于最终提交和现场演示前整理材料。建议把本文档作为验收总索引，配合 `docs/report_materials.md`、`docs/data_and_tests.md`、`docs/code_structure_and_principles.md`、`docs/sql_code_analysis.md` 和实际截图完成实验报告。
+本文档用于最终提交和现场演示前整理材料。建议把本文档作为验收总索引，配合 `docs/report_materials.md`、`docs/data_and_tests.md`、`docs/code_structure_and_principles.md`、`docs/sql_code_analysis.md`、`docs/experiment_report_submission_guide.md`、`docs/acceptance_q_and_a.md` 和实际截图完成实验报告。
 
 ## 1. 项目基本信息
 
