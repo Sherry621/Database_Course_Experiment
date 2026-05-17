@@ -181,7 +181,7 @@ ON parent_child_relations(parent_id);
 作用：
 
 ```text
-优化根据父节点 ID 查询子女节点的操作，用于后代树、分支导出和四代后代查询。
+优化根据父节点 ID 查询子女节点的操作，用于后代树、分支导出和曾祖父到曾孙查询。
 ```
 
 ### 5.3 子节点查询父节点索引
@@ -423,15 +423,15 @@ generated_data/performance_explain.txt
 报告中说明：
 
 ```text
-无 parent_id/child_id 索引时，四代后代查询耗时较高。
+无 parent_id/child_id 索引时，曾祖父到曾孙查询耗时较高。
 创建 parent_id/child_id 索引后，查询时间下降。
 ```
 
-你之前实测结果：
+本次 10W 数据实测结果：
 
 ```text
-无索引：约 1.509 ms
-有索引：约 0.519 ms
+无索引：约 71 ms，执行计划包含 Seq Scan on parent_child_relations
+有索引：约 0.3 ms，执行计划包含 Index Scan using idx_parent_child_parent_id
 ```
 
 ## 12. 数据库导出或备份文件
@@ -507,7 +507,7 @@ ER 图图片
 SQL 执行结果截图
 EXPLAIN 性能截图或 performance_explain.txt
 数据库备份文件 generated_data/genealogy_lab.backup
-分支导出文件 generated_data/branch_export.csv
+分支导出文件 generated_data/branch_*.csv
 数据生成源码 tools/generate_data.py
 项目源码 src/
 数据库脚本 sql/
@@ -528,6 +528,6 @@ generated_data/
 
 ```text
 generated_data/genealogy_lab.backup
-generated_data/branch_export.csv
+generated_data/branch_*.csv
 generated_data/performance_explain.txt
 ```

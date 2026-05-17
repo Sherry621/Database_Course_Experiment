@@ -343,7 +343,7 @@ CREATE INDEX idx_members_name_trgm ON members USING GIN (name gin_trgm_ops);
 
 ```text
 使用 parent_child_relations(parent_id) 索引。
-后代树、分支导出和四代后代查询都需要根据 parent_id 查 child_id，因此该索引可以减少扫描范围。
+后代树、分支导出和曾祖父到曾孙查询都需要根据 parent_id 查 child_id，因此该索引可以减少扫描范围。
 ```
 
 ### Q30：为什么还建立 child_id 索引？
@@ -361,8 +361,8 @@ child_id 索引用于反向查询父母。
 参考回答：
 
 ```text
-在 sql/07_performance_explain.sql 中，先 DROP INDEX 删除 parent_id 和 child_id 索引，执行四代后代查询并使用 EXPLAIN ANALYZE 记录执行计划和耗时。
-然后重新 CREATE INDEX，再执行同样的四代后代查询。
+在 sql/07_performance_explain.sql 中，先 DROP INDEX 删除 parent_id 和 child_id 索引，执行曾祖父到曾孙查询并使用 EXPLAIN ANALYZE 记录执行计划和耗时。
+然后重新 CREATE INDEX，再执行同样的曾祖父到曾孙查询。
 最后对比有无索引时的 Execution Time。
 ```
 
@@ -371,7 +371,7 @@ child_id 索引用于反向查询父母。
 参考回答：
 
 ```text
-在我的测试中，无 parent_id/child_id 索引时，四代后代查询耗时约 1.509 ms。
+在 10W 数据测试中，无 parent_id/child_id 索引时会走 `Seq Scan`，本次执行约 71 ms；重建 `idx_parent_child_parent_id` 后会走 `Index Scan`，本次执行约 0.3 ms。
 创建索引后，同样查询耗时约 0.519 ms。
 说明 parent_child_relations(parent_id) 和 child_id 索引能有效优化层级查询。
 ```
@@ -448,7 +448,7 @@ pg_dump "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab
 ```text
 使用 sql/06_export_branch.sql。
 该脚本通过 Recursive CTE 从 root_id 指定的成员开始，向下递归查找后代，并按 max_depth 控制导出层数。
-最后导出到 generated_data/branch_export.csv。
+最后导出到 generated_data/branch_*.csv。
 ```
 
 ## 8. 系统功能问题
@@ -612,7 +612,7 @@ ER 图图片。
 SQL 执行结果截图。
 EXPLAIN 性能分析截图或 performance_explain.txt。
 数据库备份文件 genealogy_lab.backup。
-分支导出文件 branch_export.csv。
+分支导出文件 branch_*.csv。
 数据生成工具源码 tools/generate_data.py。
 项目源码 src、sql、tools、scripts、docs。
 README.md 和 CMakeLists.txt。

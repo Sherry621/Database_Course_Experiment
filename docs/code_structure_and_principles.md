@@ -807,7 +807,7 @@ WITH RECURSIVE descendant_ids AS (...)
 该脚本会把指定根成员向下若干层的成员导出为：
 
 ```text
-generated_data/branch_export.csv
+generated_data/branch_*.csv
 ```
 
 ### `sql/07_performance_explain.sql`
@@ -818,7 +818,7 @@ generated_data/branch_export.csv
 
 ```text
 先删除 parent_id 相关索引
-执行四代后代查询 EXPLAIN ANALYZE
+执行曾祖父到曾孙查询 EXPLAIN ANALYZE
 再创建 parent_id 和 child_id 索引
 再次执行 EXPLAIN ANALYZE
 对比执行时间和执行计划

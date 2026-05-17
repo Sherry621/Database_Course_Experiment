@@ -659,7 +659,7 @@ ON parent_child_relations(parent_id);
 用途：
 
 ```text
-优化“根据父节点查询子节点”的查询，例如后代树和四代后代性能测试。
+优化“根据父节点查询子节点”的查询，例如后代树和曾祖父到曾孙性能测试。
 ```
 
 姓名模糊查询索引：
@@ -1619,7 +1619,7 @@ WITH RECURSIVE descendant_ids(member_id, depth) AS (
 - 从根成员开始。
 - 递归查每一层子女。
 - 使用 `depth` 控制导出层数。
-- 最后用 `\copy` 导出到 `generated_data/branch_export.csv`。
+- 最后用 `\copy` 导出到 `generated_data/branch_*.csv`。
 
 
 
@@ -1726,13 +1726,13 @@ EXPLAIN (ANALYZE, BUFFERS) ...
 WITH RECURSIVE descendants AS (...)
 SELECT *
 FROM descendants
-WHERE depth = 4;
+WHERE depth = 3;
 ```
 
 用途：
 
 ```text
-对比查询某曾祖父所有曾孙，即四代后代查询，在有无 parent_id 索引时的执行计划和执行时间。
+对比查询某曾祖父所有曾孙，即曾祖父到曾孙查询，在有无 parent_id 索引时的执行计划和执行时间。
 ```
 
 `EXPLAIN (ANALYZE, BUFFERS)` 的含义：

@@ -39,8 +39,8 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
 | 文件 | 用途 | 是否必需 |
 | --- | --- | --- |
 | `05_load_generated_csv.sql` | 清空业务表并使用 `\copy` 导入 `generated_data/` 下的 10W 级 CSV。 | 必需 |
-| `06_export_branch.sql` | 导出某成员后代分支到 `generated_data/branch_export.csv`，支持 `root_id` 和 `max_depth` 变量。 | 必需 |
-| `07_performance_explain.sql` | 对比有无 `parent_child_relations(parent_id)` 索引时四代后代查询的 `EXPLAIN ANALYZE`。 | 必需 |
+| `06_export_branch.sql` | 导出某成员后代分支备份，包含分支成员、分支内亲子关系和分支内婚姻关系三份 CSV，支持 `root_id` 和 `max_depth` 变量。 | 必需 |
+| `07_performance_explain.sql` | 对比有无 `parent_child_relations(parent_id)` 索引时查询某曾祖父所有曾孙的 `EXPLAIN ANALYZE`。 | 必需 |
 
 10W 数据流程：
 
@@ -48,8 +48,20 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
 python3 tools/generate_data.py --out generated_data --total-members 100000
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/05_load_generated_csv.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=168 -v max_depth=4 -f sql/06_export_branch.sql
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=168 -f sql/07_performance_explain.sql
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=168 -v output_file=generated_data/performance_explain.txt -f sql/07_performance_explain.sql
 ```
+
+分支导出可控参数：
+
+- `root_id`：要导出的分支根成员 ID。换成其他成员 ID，就会导出另一个成员的后代分支。
+- `max_depth`：向下导出的最大后代层数。`0` 只导出根成员，`1` 导出根成员和子女，依此类推。
+
+在同一个数据库状态下，使用相同的 `root_id` 和 `max_depth`，导出的 CSV 内容是确定的；如果重新生成数据、重新导入数据，或选择不同根成员/深度，导出结果会不同。
+
+性能分析输出文件：
+
+- `07_performance_explain.sql` 默认写入 `generated_data/performance_explain.txt`。
+- 可以通过 `-v output_file=路径` 改成其他输出文件。
 
 ## 4. 清理说明
 

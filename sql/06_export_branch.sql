@@ -1,4 +1,4 @@
--- Export one descendant branch as a CSV backup file.
+-- Export one descendant branch as CSV backup files.
 --
 -- Optional psql variables:
 --   root_id   branch root member id, default 1
@@ -21,11 +21,11 @@
 \set max_depth 6
 \endif
 
-\echo 'exporting descendant branch rooted at member_id=' :root_id 'max_depth=' :max_depth 'to generated_data/branch_export.csv'
+\echo 'exporting descendant branch rooted at member_id=' :root_id 'max_depth=' :max_depth 'to generated_data/branch_*.csv'
 
-DROP TABLE IF EXISTS tmp_branch_export;
+DROP TABLE IF EXISTS tmp_branch_members;
 
-CREATE TEMP TABLE tmp_branch_export AS
+CREATE TEMP TABLE tmp_branch_members AS
 WITH RECURSIVE descendant_ids(member_id, depth) AS (
     SELECT
         m.member_id,
@@ -45,7 +45,6 @@ WITH RECURSIVE descendant_ids(member_id, depth) AS (
 SELECT
     m.member_id,
     m.genealogy_id,
-    p.parent_id,
     min(d.depth) AS depth,
     m.name,
     m.gender,
@@ -55,18 +54,9 @@ SELECT
     m.biography
 FROM descendant_ids d
 JOIN members m ON m.member_id = d.member_id
-LEFT JOIN LATERAL (
-    SELECT r.parent_id
-    FROM parent_child_relations r
-    JOIN descendant_ids known_parent ON known_parent.member_id = r.parent_id
-    WHERE r.child_id = d.member_id
-    ORDER BY known_parent.depth, r.parent_id
-    LIMIT 1
-) p ON true
 GROUP BY
     m.member_id,
     m.genealogy_id,
-    p.parent_id,
     m.name,
     m.gender,
     m.birth_year,
@@ -76,8 +66,42 @@ GROUP BY
 ORDER BY min(d.depth), m.generation, m.member_id
 ;
 
-\copy tmp_branch_export TO 'generated_data/branch_export.csv' WITH (FORMAT csv, HEADER true)
+\copy tmp_branch_members TO 'generated_data/branch_members.csv' WITH (FORMAT csv, HEADER true)
 
-DROP TABLE tmp_branch_export;
+CREATE TEMP TABLE tmp_branch_parent_child_relations AS
+    SELECT
+        r.relation_id,
+        r.genealogy_id,
+        r.parent_id,
+        r.child_id,
+        r.relation_type
+    FROM parent_child_relations r
+    JOIN tmp_branch_members parent_member ON parent_member.member_id = r.parent_id
+    JOIN tmp_branch_members child_member ON child_member.member_id = r.child_id
+    ORDER BY r.relation_id
+;
 
-\echo 'branch export completed'
+\copy tmp_branch_parent_child_relations TO 'generated_data/branch_parent_child_relations.csv' WITH (FORMAT csv, HEADER true)
+
+CREATE TEMP TABLE tmp_branch_marriages AS
+    SELECT
+        mr.marriage_id,
+        mr.genealogy_id,
+        mr.person1_id,
+        mr.person2_id,
+        mr.marriage_year,
+        mr.divorce_year,
+        mr.description
+    FROM marriages mr
+    JOIN tmp_branch_members p1 ON p1.member_id = mr.person1_id
+    JOIN tmp_branch_members p2 ON p2.member_id = mr.person2_id
+    ORDER BY mr.marriage_id
+;
+
+\copy tmp_branch_marriages TO 'generated_data/branch_marriages.csv' WITH (FORMAT csv, HEADER true)
+
+DROP TABLE tmp_branch_marriages;
+DROP TABLE tmp_branch_parent_child_relations;
+DROP TABLE tmp_branch_members;
+
+\echo 'branch export completed: branch_members.csv, branch_parent_child_relations.csv, branch_marriages.csv'

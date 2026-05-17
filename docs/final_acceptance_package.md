@@ -209,7 +209,7 @@ pg_dump "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab
 ```text
 姓名模糊查询使用 pg_trgm + GIN 索引。
 父节点查询子节点使用 parent_child_relations(parent_id) 索引。
-性能脚本通过删除和重建索引，对四代后代查询执行 EXPLAIN ANALYZE，对比有无索引的执行计划和耗时。
+性能脚本通过删除和重建索引，对曾祖父到曾孙查询执行 EXPLAIN ANALYZE，对比有无索引的执行计划和耗时。
 ```
 
 ### 7.4 权限控制
@@ -242,7 +242,7 @@ README.md
 ```text
 实验报告 PDF 或 Word
 数据库备份文件 generated_data/genealogy_lab.backup
-分支导出文件 generated_data/branch_export.csv
+分支导出文件 generated_data/branch_*.csv
 数据生成工具源码 tools/generate_data.py
 关键 SQL 脚本 sql/*.sql
 演示截图

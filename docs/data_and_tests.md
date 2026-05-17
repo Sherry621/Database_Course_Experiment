@@ -78,18 +78,22 @@ max_generation=35
 ```bash
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
-  -v root_id=1 \
-  -v max_depth=6 \
+  -v root_id=168 \
+  -v max_depth=4 \
   -f sql/06_export_branch.sql
 ```
 
 输出：
 
 ```text
-generated_data/branch_export.csv
+generated_data/branch_members.csv
+generated_data/branch_parent_child_relations.csv
+generated_data/branch_marriages.csv
 ```
 
-本次测试导出 34 条成员记录，CSV 共 35 行含表头。
+其中 `branch_members.csv` 保存分支成员，`branch_parent_child_relations.csv` 保存分支内部亲子边，`branch_marriages.csv` 保存分支内部婚姻关系。这样比单独导出成员列表更接近“分支备份文件”的含义。
+
+导出分支由 `root_id` 和 `max_depth` 控制。同一数据库状态下，相同参数会导出相同内容；更换 `root_id` 可以导出其他成员的后代分支，更换 `max_depth` 可以控制导出层数。
 
 ## 6. EXPLAIN 性能对比
 
@@ -98,24 +102,31 @@ generated_data/branch_export.csv
 ```bash
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
-  -v root_id=1 \
+  -v root_id=168 \
+  -v output_file=generated_data/performance_explain.txt \
   -f sql/07_performance_explain.sql
+```
+
+完整输出会保存到：
+
+```text
+generated_data/performance_explain.txt
 ```
 
 无 `parent_id` 索引：
 
 ```text
 Seq Scan on parent_child_relations
-Execution Time: 86.564 ms
-Buffers: shared hit=4888
+Execution Time: 71.234 ms
+Buffers: shared hit=3747
 ```
 
 有 `idx_parent_child_parent_id` 索引：
 
 ```text
 Index Scan using idx_parent_child_parent_id
-Execution Time: 0.298 ms
-Buffers: shared hit=39 read=6
+Execution Time: 0.305 ms
+Buffers: shared hit=166 read=13
 ```
 
-结论：`parent_child_relations(parent_id)` 索引能显著优化父节点查子节点的递归后代查询。
+结论：PPT 要求的“查询某曾祖父的所有曾孙”对应递归深度 `depth=3`，`parent_child_relations(parent_id)` 索引能显著优化该类父节点查子节点的递归查询。

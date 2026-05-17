@@ -40,10 +40,6 @@
 - EXPLAIN ANALYZE 性能测试脚本
 - ER 图、关系模型、3NF/BCNF 分析
 
-待继续完善：
-
-- 实验报告截图与最终演示材料整理
-
 ## 目录结构
 
 ```text
@@ -118,9 +114,13 @@
 - `sql/07_performance_explain.sql`：索引性能对比 EXPLAIN
 - `tools/generate_data.py`：模拟数据生成工具
 
-## 环境准备
+# 使用与环境配置
 
-在 WSL Ubuntu 中安装依赖：
+本文档整合环境安装、数据库初始化、编译运行和中文输入配置。
+
+## 1. 环境依赖
+
+WSL Ubuntu 24.04 下安装：
 
 ```bash
 sudo apt-get update
@@ -134,8 +134,6 @@ sudo apt-get install -y \
   qt6-tools-dev \
   qt6-tools-dev-tools \
   libqt6sql6-psql \
-  libxkbcommon-dev \
-  libxkbcommon-x11-dev \
   postgresql \
   postgresql-16 \
   postgresql-contrib \
@@ -147,7 +145,9 @@ sudo apt-get install -y \
   fcitx5-frontend-qt6
 ```
 
-`libxkbcommon-dev` 和 `libxkbcommon-x11-dev` 用于补齐 Qt/xcb 的键盘依赖检测。`fcitx5`、`fcitx5-chinese-addons` 和 `fcitx5-frontend-qt6` 用于 Qt6 中文输入。缺少 fcitx5 相关包时，界面可以显示中文，但输入框中通常无法输入中文。
+中文输入需要 `fcitx5`、`fcitx5-chinese-addons` 和 `fcitx5-frontend-qt6`。如果缺少这些包，Qt6 程序中可以显示中文，但无法输入中文。
+
+## 2. 数据库初始化
 
 启动 PostgreSQL：
 
@@ -156,9 +156,7 @@ sudo service postgresql start
 pg_isready
 ```
 
-## 初始化数据库
-
-创建数据库用户和数据库：
+创建用户和数据库：
 
 ```bash
 sudo -u postgres psql
@@ -173,63 +171,35 @@ CREATE DATABASE genealogy_lab OWNER genealogy_user;
 执行初始化脚本：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
-
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/01_schema.sql
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/02_indexes.sql
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/03_triggers.sql
+cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/01_schema.sql
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/02_indexes.sql
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/03_triggers.sql
 ```
 
-## 创建测试账号
-
-程序支持在登录窗口直接注册用户。也可以通过 SQL 创建测试账号。
-
-用户名：`admin`
-
-密码：`123456`
+导入 10 万级数据：
 
 ```bash
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab"
+python3 tools/generate_data.py --out generated_data --total-members 100000
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/05_load_generated_csv.sql
 ```
 
-```sql
-INSERT INTO users(username, password_hash, real_name, email)
-VALUES (
-  'admin',
-  '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',
-  '管理员',
-  'admin@example.com'
-);
+## 3. 编译运行
 
-INSERT INTO genealogies(title, family_surname, creator_user_id, description)
-VALUES ('张氏族谱', '张', 1, '测试族谱');
-
-\q
-```
-
-## 编译运行
-
-进入项目目录：
-
-```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
-```
-
-使用当前项目下的 `build/` 构建目录：
+在项目根目录：
 
 ```bash
 cmake -S . -B build -G Ninja
 cmake --build build
 ```
 
-运行程序。推荐使用脚本启动，它会设置中文输入相关环境变量：
+运行 GUI：
 
 ```bash
-./scripts/setup_fcitx_wsl.sh
 ./scripts/run_wsl.sh
 ```
 
-如果要手动启动并保留中文输入，需要同时设置 fcitx5 相关环境变量：
+也可以手动运行：
 
 ```bash
 env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=xcb \
@@ -237,110 +207,60 @@ env XDG_RUNTIME_DIR=/mnt/wslg/runtime-dir QT_QPA_PLATFORM=xcb \
   ./build/GenealogySystem
 ```
 
-登录：
+登录账号：
 
 ```text
-用户名：admin
-密码：123456
+admin / 123456
 ```
 
-## 常见问题
+## 4. 中文输入
 
-### CMakeCache 路径不一致
-
-如果出现 Windows 路径和 WSL 路径冲突，不要共用 `build/` 目录。WSL 下使用：
+第一次使用前执行：
 
 ```bash
-cmake -S . -B build -G Ninja
-cmake --build build
+./scripts/setup_fcitx_wsl.sh
+./scripts/run_wsl.sh
 ```
 
-### CMake 提示 Could NOT find XKB
-
-如果配置时出现：
-
-```text
-Could NOT find XKB (missing: XKB_LIBRARY XKB_INCLUDE_DIR)
-```
-
-说明系统缺少 XKB 开发包。它不是“无法输入中文”的直接原因，但建议补齐，否则 Qt/xcb 的键盘依赖检测不完整：
-
-```bash
-sudo apt-get install -y libxkbcommon-dev libxkbcommon-x11-dev
-cmake -S . -B build -G Ninja
-cmake --build build
-```
-
-### 中文显示为方框
-
-安装中文字体：
-
-```bash
-sudo apt-get install -y fonts-noto-cjk fonts-wqy-microhei
-fc-cache -fv
-```
-
-### 无法输入中文
-
-先安装并配置 fcitx5：
+如果脚本提示缺包，先执行：
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y fcitx5 fcitx5-chinese-addons fcitx5-frontend-qt6
-./scripts/setup_fcitx_wsl.sh
-./scripts/check_chinese_input.sh
-./scripts/run_wsl.sh
 ```
 
-`check_chinese_input.sh` 输出中应包含 `IM_MODULE_CLASSNAME=fcitx::QFcitxPlatformInputContext`。不要用 Wayland 方式或 IDE 直接启动来测试中文输入；`scripts/run_wsl.sh` 会强制使用 `QT_QPA_PLATFORM=xcb`，在 WSLg/XWayland 下更容易让 fcitx5 接管 Qt 输入框。
+验证 Qt6 输入法插件：
+
+```bash
+./scripts/check_chinese_input.sh
+```
+
+输出中应包含：
+
+```text
+IM_MODULE_CLASSNAME=fcitx::QFcitxPlatformInputContext
+```
+
+如果只看到 `QComposeInputContext`，说明当前启动环境没有让 Qt6 接入 fcitx。此时不要直接运行 `./build/GenealogySystem`，需要用 `./scripts/run_wsl.sh` 启动。
+
+## 5. 常见问题
+
+### CMakeCache 路径不一致
+
+删除旧构建目录后重新构建：
+
+```bash
+rm -rf build
+cmake -S . -B build -G Ninja
+cmake --build build
+```
 
 ### QStandardPaths 权限警告
 
-推荐使用：
+WSLg 下可能出现：
 
-```bash
-./scripts/run_wsl.sh
+```text
+QStandardPaths: wrong permissions on runtime directory /mnt/wslg/runtime-dir
 ```
 
-## 文档索引
-
-- [系统框架说明](docs/system_framework.md)
-- [使用与环境配置](docs/usage.md)
-- [数据工程与验收](docs/data_and_tests.md)
-- [报告材料：ER 图、关系模型与范式分析](docs/report_materials.md)
-- [实现路线与分工](docs/planning_and_work.md)
-- [文件结构说明](docs/project_structure.md)
-- [GitHub 上传步骤](docs/github_upload.md)
-- [验收检查清单](docs/acceptance_checklist.md)
-- [最终验收资料包](docs/final_acceptance_package.md)
-- [项目文件结构与关键代码实现原理](docs/code_structure_and_principles.md)
-- [SQL 语句代码详细解析](docs/sql_code_analysis.md)
-- [实验报告提交材料说明](docs/experiment_report_submission_guide.md)
-- [验收常见问题与参考回答](docs/acceptance_q_and_a.md)
-
-## 分工建议
-
-本项目适合两人合作完成：
-
-- 成员 A：数据库设计、SQL 查询、数据生成、导入导出、索引优化与性能分析。
-- 成员 B：C++/Qt 系统开发、界面设计、登录注册、成员管理、树形预览、祖先查询和亲缘链路查询。
-
-详细分工见 `docs/planning_and_work.md`。
-
-## 课程报告材料
-
-报告建议包含：
-
-- 需求分析
-- 系统总体设计
-- E-R 图与关系模型
-- 范式分析
-- 数据库表结构
-- 约束与触发器
-- 索引设计
-- 核心 SQL
-- C++ 系统实现
-- 数据生成与导入导出
-- 性能测试与 EXPLAIN 分析
-- 系统运行截图
-- 总结
+通常不影响程序启动。建议继续用 `scripts/run_wsl.sh` 运行。
