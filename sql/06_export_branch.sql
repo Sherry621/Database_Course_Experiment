@@ -9,7 +9,7 @@
 --   psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
 --     -v root_id=1 \
 --     -v max_depth=6 \
---     -f sql/09_export_branch.sql
+--     -f sql/06_export_branch.sql
 
 \if :{?root_id}
 \else

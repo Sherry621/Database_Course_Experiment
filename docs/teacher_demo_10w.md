@@ -24,8 +24,8 @@
 | 系统不少于 100000 条成员数据 | 当前生成 100000 条成员数据 | 已完成 | `generated_data/members.csv`、导入后统计 |
 | 每个族谱成员至少与另一个成员有亲缘关系 | 生成脚本为每个族谱按代建立父母子女关系 | 已完成 | `parent_child_relations` 统计 |
 | 单个族谱至少 30 代传承 | 第 1 个族谱 35 代 | 已完成 | 导入后 `max_generation=35` |
-| COPY 批量导入 CSV | 使用 PostgreSQL `\copy` 导入 6 个 CSV | 已完成 | `sql/08_load_generated_csv.sql` |
-| 导出某分支备份文件 | 使用递归 CTE 导出后代分支 CSV | 已完成 | `sql/09_export_branch.sql` |
+| COPY 批量导入 CSV | 使用 PostgreSQL `\copy` 导入 6 个 CSV | 已完成 | `sql/05_load_generated_csv.sql` |
+| 导出某分支备份文件 | 使用递归 CTE 导出后代分支 CSV | 已完成 | `sql/06_export_branch.sql` |
 | 核心 SQL：配偶及子女 | `sql/04_core_queries.sql` 第 1 条 | 已完成 | psql 截图 |
 | 核心 SQL：递归祖先 | `sql/04_core_queries.sql` 第 2 条 | 已完成 | psql 截图 |
 | 核心 SQL：平均寿命最长的一代 | `sql/04_core_queries.sql` 第 3 条 | 已完成 | psql 截图 |
@@ -33,7 +33,7 @@
 | 核心 SQL：早于同代平均出生年份成员 | `sql/04_core_queries.sql` 第 5 条 | 已完成 | psql 截图 |
 | 姓名模糊查询索引 | `idx_members_name_trgm` | 已完成 | `sql/02_indexes.sql` |
 | 父节点 ID 查询子节点索引 | `idx_parent_child_parent_id` | 已完成 | `sql/02_indexes.sql` |
-| 有无索引四代查询性能对比与 EXPLAIN | 脚本先删除索引测试，再重建索引测试 | 已完成 | `sql/10_performance_explain.sql` |
+| 有无索引四代查询性能对比与 EXPLAIN | 脚本先删除索引测试，再重建索引测试 | 已完成 | `sql/07_performance_explain.sql` |
 | 提交数据生成工具源码 | Python 生成脚本已保留 | 已完成 | `tools/generate_data.py` |
 | 提交数据库导出或备份文件 | 分支导出 CSV 已支持 | 已完成 | `generated_data/branch_export.csv` |
 
@@ -61,13 +61,13 @@ cmake -S . -B build -G Ninja
 cmake --build build
 ```
 
-如果数据库不是 10W 数据状态，重新生成并导入。注意：正式演示不要运行 `sql/05_seed_small.sql`、`sql/06_stage1_check.sql`、`sql/07_seed_demo.sql`。
+如果数据库不是 10W 数据状态，重新生成并导入。项目已删除早期小数据脚本，正式演示只走 10W 数据流程。
 
 ```bash
 python3 tools/generate_data.py --out generated_data --total-members 100000
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
-  -f sql/08_load_generated_csv.sql
+  -f sql/05_load_generated_csv.sql
 ```
 
 确认 10W 数据规模：
@@ -434,7 +434,7 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
 ```bash
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
-  -f sql/08_load_generated_csv.sql
+  -f sql/05_load_generated_csv.sql
 ```
 
 讲解要点：
@@ -454,7 +454,7 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
   -v root_id=168 \
   -v max_depth=4 \
-  -f sql/09_export_branch.sql
+  -f sql/06_export_branch.sql
 ```
 
 输出文件：
@@ -478,7 +478,7 @@ generated_data/branch_export.csv
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
   -v root_id=168 \
-  -f sql/10_performance_explain.sql
+  -f sql/07_performance_explain.sql
 ```
 
 讲解要点：

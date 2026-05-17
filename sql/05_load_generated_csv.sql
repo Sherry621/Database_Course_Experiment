@@ -2,7 +2,7 @@
 --
 -- Run from Database_Course_Experiment/ after generating CSV files:
 --   python3 tools/generate_data.py --out generated_data --total-members 100000
---   psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/08_load_generated_csv.sql
+--   psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/05_load_generated_csv.sql
 
 TRUNCATE TABLE
     marriages,

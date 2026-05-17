@@ -122,7 +122,6 @@ C++17 + Qt6 + PostgreSQL genealogy management system for database course project
 ```bash
 cmake -S . -B build -G Ninja
 cmake --build build
-./build/Stage2Smoke
 ```
 
 需要启动图形界面时执行：

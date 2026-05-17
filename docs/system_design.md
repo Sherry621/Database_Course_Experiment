@@ -50,7 +50,6 @@ SQL 表结构、索引、触发器、递归查询
 ├── docs/
 ├── sql/
 ├── src/
-├── tests/
 ├── tools/
 └── scripts/
 ```
@@ -62,7 +61,6 @@ SQL 表结构、索引、触发器、递归查询
 - `src/service/`：认证、统计、树形结构和亲缘链路业务逻辑。
 - `src/ui/`：Qt Widgets 界面。
 - `sql/`：建表、索引、触发器、核心查询、导入导出和性能分析脚本。
-- `tests/`：自动验收程序。
 - `tools/`：10 万级模拟数据生成工具。
 - `scripts/`：WSL 启动和中文输入法辅助脚本。
 
@@ -109,12 +107,12 @@ SQL 表结构、索引、触发器、递归查询
 
 ## 6. 数据工程
 
-项目提供 `tools/generate_data.py` 生成 10 万级 CSV 数据，并通过 `sql/08_load_generated_csv.sql` 使用 PostgreSQL `COPY` 批量导入。
+项目提供 `tools/generate_data.py` 生成 10 万级 CSV 数据，并通过 `sql/05_load_generated_csv.sql` 使用 PostgreSQL `COPY` 批量导入。
 
 导出和性能脚本：
 
-- `sql/09_export_branch.sql`：按成员根节点导出分支数据。
-- `sql/10_performance_explain.sql`：对核心查询执行 `EXPLAIN ANALYZE`，用于索引效果分析。
+- `sql/06_export_branch.sql`：按成员根节点导出分支数据。
+- `sql/07_performance_explain.sql`：对核心查询执行 `EXPLAIN ANALYZE`，用于索引效果分析。
 
 ## 7. 构建与运行
 
@@ -129,12 +127,6 @@ cmake --build build
 
 ```bash
 ./scripts/run_wsl.sh
-```
-
-运行自动验收：
-
-```bash
-./build/Stage2Smoke
 ```
 
 完整环境配置、数据库初始化和中文输入说明见 `docs/usage.md`。

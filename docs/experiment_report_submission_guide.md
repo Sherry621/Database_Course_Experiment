@@ -324,7 +324,7 @@ generated_data/marriages.csv
 ```bash
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
-  -f sql/08_load_generated_csv.sql
+  -f sql/05_load_generated_csv.sql
 ```
 
 ## 8. RDBMS 名称和版本说明
@@ -401,7 +401,7 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
 对应文件：
 
 ```text
-sql/10_performance_explain.sql
+sql/07_performance_explain.sql
 ```
 
 执行：
@@ -410,7 +410,7 @@ sql/10_performance_explain.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
   -v root_id=1 \
-  -f sql/10_performance_explain.sql \
+  -f sql/07_performance_explain.sql \
   > generated_data/performance_explain.txt
 ```
 

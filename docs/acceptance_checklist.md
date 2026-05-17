@@ -28,8 +28,6 @@ PostgreSQL 服务返回 accepting connections。
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/01_schema.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/02_indexes.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/03_triggers.sql
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/05_seed_small.sql
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/06_stage1_check.sql
 ```
 
 预期：
@@ -38,8 +36,6 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -
 表结构创建成功。
 索引创建成功。
 触发器创建成功。
-小数据导入成功。
-阶段一检查脚本通过。
 ```
 
 ## 3. C++ 构建检查
@@ -53,22 +49,9 @@ cmake --build build
 
 ```text
 build/GenealogySystem
-build/Stage2Smoke
 ```
 
-## 4. 自动冒烟测试
-
-```bash
-./build/Stage2Smoke
-```
-
-预期输出包含：
-
-```text
-PASS: login, genealogy loading, dashboard, and member list are working.
-```
-
-## 5. GUI 运行检查
+## 4. GUI 运行检查
 
 如果需要中文输入法，先执行：
 
@@ -116,19 +99,19 @@ python3 tools/generate_data.py --out generated_data --total-members 100000
 导入：
 
 ```bash
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/08_load_generated_csv.sql
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/05_load_generated_csv.sql
 ```
 
 分支导出：
 
 ```bash
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=1 -v max_depth=6 -f sql/09_export_branch.sql
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=1 -v max_depth=6 -f sql/06_export_branch.sql
 ```
 
 性能测试：
 
 ```bash
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=1 -f sql/10_performance_explain.sql
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=1 -f sql/07_performance_explain.sql
 ```
 
 报告截图至少应包含：

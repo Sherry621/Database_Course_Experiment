@@ -1,8 +1,8 @@
-# 数据工程与阶段验收
+# 数据工程与验收
 
-本文档整合阶段验收、10 万级数据生成、COPY 导入、分支导出和性能测试结果。
+本文档整合最终 10W 数据生成、COPY 导入、分支导出和性能测试结果。
 
-## 1. 阶段一：数据库初始化
+## 1. 数据库初始化
 
 执行：
 
@@ -10,37 +10,23 @@
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/01_schema.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/02_indexes.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/03_triggers.sql
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/05_seed_small.sql
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/06_stage1_check.sql
 ```
 
-小数据验证结果：
+初始化内容：
 
 ```text
-users: 2
-genealogies: 1
-genealogy_collaborators: 1
-members: 7
-parent_child_relations: 7
-marriages: 2
+01_schema.sql    建表、主键、外键、CHECK 约束
+02_indexes.sql   姓名模糊查询、亲子关系和统计查询相关索引
+03_triggers.sql  亲子关系和婚姻关系业务约束触发器
 ```
 
-触发器已验证能拒绝女性成员作为 `father` 的错误亲子关系。
-
-## 2. 阶段二：Qt 编译与连接
+## 2. Qt 编译
 
 执行：
 
 ```bash
 cmake -S . -B build -G Ninja
 cmake --build build
-./build/Stage2Smoke
-```
-
-通过输出：
-
-```text
-PASS: login, genealogy loading, dashboard, and member list are working.
 ```
 
 ## 3. 10 万级数据生成
@@ -74,7 +60,7 @@ marriages=12476
 ```bash
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
-  -f sql/08_load_generated_csv.sql
+  -f sql/05_load_generated_csv.sql
 ```
 
 导入后最大族谱：
@@ -94,7 +80,7 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
   -v root_id=1 \
   -v max_depth=6 \
-  -f sql/09_export_branch.sql
+  -f sql/06_export_branch.sql
 ```
 
 输出：
@@ -113,7 +99,7 @@ generated_data/branch_export.csv
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
   -v ON_ERROR_STOP=1 \
   -v root_id=1 \
-  -f sql/10_performance_explain.sql
+  -f sql/07_performance_explain.sql
 ```
 
 无 `parent_id` 索引：

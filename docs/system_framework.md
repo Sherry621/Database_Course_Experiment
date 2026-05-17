@@ -18,14 +18,14 @@ src/
 ├── service/     认证、统计、族谱树、亲缘链路等业务逻辑
 └── ui/          登录窗口、主窗口、成员弹窗
 
-tests/
-└── stage2_smoke.cpp
-
 sql/
 ├── 01_schema.sql        建表脚本
 ├── 02_indexes.sql       索引脚本
 ├── 03_triggers.sql      触发器脚本
-└── 04_core_queries.sql  课程要求核心查询
+├── 04_core_queries.sql  课程要求核心查询
+├── 05_load_generated_csv.sql
+├── 06_export_branch.sql
+└── 07_performance_explain.sql
 ```
 
 ## 3. 分层说明
@@ -62,12 +62,11 @@ PostgreSQL 层
 - 祖先递归查询
 - 两成员亲缘链路 BFS 查询
 
-## 5. 后续实现优先级
+## 5. 最终验收流程
 
 1. 执行 `sql/01_schema.sql`、`sql/02_indexes.sql`、`sql/03_triggers.sql` 初始化数据库。
-2. 插入少量用户、族谱、成员、亲子关系测试数据。
-3. 在项目根目录编译运行 Qt 项目，验证登录和数据库连接。
-4. 补充族谱管理、成员编辑删除、亲子关系维护、婚姻关系维护界面。
-5. 基于 `tools/generate_data.py` 生成 10 万级 CSV，并使用 `sql/08_load_generated_csv.sql` 执行 `COPY` 导入。
-6. 使用 `sql/09_export_branch.sql` 导出分支备份。
-7. 使用 `sql/10_performance_explain.sql` 截图整理 EXPLAIN ANALYZE 性能对比，用于课程报告。
+2. 基于 `tools/generate_data.py` 生成 10 万级 CSV，并使用 `sql/05_load_generated_csv.sql` 执行 `COPY` 导入。
+3. 编译并运行 Qt 项目，展示登录、Dashboard、族谱、成员、关系维护、树形预览、祖先查询和亲缘链路。
+4. 使用 `sql/04_core_queries.sql` 展示 PPT 要求的核心 SQL。
+5. 使用 `sql/06_export_branch.sql` 导出分支备份。
+6. 使用 `sql/07_performance_explain.sql` 截图整理 EXPLAIN ANALYZE 性能对比，用于课程报告。

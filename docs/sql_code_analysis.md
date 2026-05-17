@@ -1459,7 +1459,7 @@ ORDER BY m.generation, m.birth_year;
 
 ## 6. 数据导入导出脚本
 
-### 6.1 `sql/08_load_generated_csv.sql`
+### 6.1 `sql/05_load_generated_csv.sql`
 
 该脚本使用 `\copy` 批量导入 CSV。
 
@@ -1530,7 +1530,7 @@ setval(...)
 
 ### 6.2 `INSERT ... ON CONFLICT` 数据脚本通用写法
 
-小数据脚本 `sql/05_seed_small.sql` 和演示数据脚本 `sql/07_seed_demo.sql` 中大量使用如下结构：
+小数据脚本 `早期小数据脚本` 和演示数据脚本 `早期演示数据脚本` 中大量使用如下结构：
 
 ```sql
 INSERT INTO users(user_id, username, password_hash, real_name, email)
@@ -1586,7 +1586,7 @@ PostgreSQL 中的特殊引用，表示“本次原本要插入但因为冲突被
 验收前可能多次执行初始化脚本。使用 ON CONFLICT 后，脚本具备幂等性，重复执行也不会因为主键已存在而失败。
 ```
 
-### 6.3 `sql/09_export_branch.sql`
+### 6.3 `sql/06_export_branch.sql`
 
 该脚本导出指定成员的后代分支。
 
@@ -1692,7 +1692,7 @@ WHERE d.depth < :max_depth
 ```
 
 限制最大递归深度，防止导出过多层级。
-### 6.4 `sql/10_performance_explain.sql`
+### 6.4 `sql/07_performance_explain.sql`
 
 该脚本用于性能对比。
 
@@ -2575,7 +2575,7 @@ WHERE genealogy_id = :genealogy_id
 
 ## 13. 自动测试中的 SQL 调用
 
-### `tests/stage2_smoke.cpp`
+### `已删除的早期冒烟测试脚本`
 
 该测试本身不直接写复杂 SQL，而是调用已有 DAO 和 Service。
 
@@ -2625,9 +2625,9 @@ PASS: login, genealogy loading, dashboard, and member list are working.
 | 婚姻关系维护 | `RelationDao::addMarriage` + 触发器 |
 | Dashboard | `DashboardService::loadStats` |
 | 核心 SQL 作业要求 | `sql/04_core_queries.sql` |
-| COPY 导入 | `sql/08_load_generated_csv.sql` |
-| 分支导出 | `sql/09_export_branch.sql` |
-| 索引性能对比 | `sql/10_performance_explain.sql` |
+| COPY 导入 | `sql/05_load_generated_csv.sql` |
+| 分支导出 | `sql/06_export_branch.sql` |
+| 索引性能对比 | `sql/07_performance_explain.sql` |
 
 ## 15. 验收讲解建议
 
@@ -2640,7 +2640,7 @@ PASS: login, genealogy loading, dashboard, and member list are working.
 4. 重点讲 Recursive CTE：祖先查询和分支导出都用 WITH RECURSIVE。
 5. 讲索引：姓名模糊查询用 pg_trgm + GIN，父节点查子节点用 parent_id 索引。
 6. 讲数据工程：Python 生成 CSV，PostgreSQL \copy 批量导入，pg_dump 或分支导出备份。
-7. 讲性能：sql/10_performance_explain.sql 删除索引和重建索引，对比 EXPLAIN ANALYZE。
+7. 讲性能：sql/07_performance_explain.sql 删除索引和重建索引，对比 EXPLAIN ANALYZE。
 ```
 
 

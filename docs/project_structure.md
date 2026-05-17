@@ -9,7 +9,6 @@
 ├── docs/
 ├── sql/
 ├── src/
-├── tests/
 ├── tools/
 ├── scripts/
 └── generated_data/
@@ -20,7 +19,6 @@
 - `docs/`：设计、运行、阶段结果和报告辅助文档。
 - `sql/`：PostgreSQL 建表、索引、触发器、查询、导入导出和性能测试脚本。
 - `src/`：Qt/C++ 主程序源码。
-- `tests/`：自动验收程序。
 - `tools/`：数据生成工具。
 - `scripts/`：WSL 运行和输入法辅助脚本。
 - `generated_data/`：生成 CSV 和导出文件，本地生成且不提交。
@@ -55,15 +53,7 @@ src/
 - `service/`：认证、统计、族谱树和亲缘链路业务逻辑。
 - `ui/`：Qt Widgets 界面。
 
-## 4. tests 目录
-
-```text
-tests/stage2_smoke.cpp
-```
-
-`Stage2Smoke` 复用主程序连接、DAO 和 Service，验证数据库连接、登录、族谱加载、Dashboard 和成员列表。
-
-## 5. scripts 目录
+## 4. scripts 目录
 
 ```text
 scripts/run_wsl.sh
@@ -75,7 +65,7 @@ scripts/check_chinese_input.sh
 - `setup_fcitx_wsl.sh`：配置 WSLg 下的 fcitx5 拼音输入法。
 - `check_chinese_input.sh`：检查 fcitx5、Qt6 输入法插件和当前输入法环境。
 
-## 6. 不应上传的目录
+## 5. 不应上传的目录
 
 ```text
 build/

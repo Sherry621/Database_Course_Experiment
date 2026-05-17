@@ -2,6 +2,7 @@ CREATE EXTENSION IF NOT EXISTS pg_trgm;
 
 CREATE INDEX IF NOT EXISTS idx_genealogies_creator
 ON genealogies(creator_user_id);
+-- postgreSQL不会自动为外键创建索引，因此我们需要手动创建索引来优化查询性能
 
 CREATE INDEX IF NOT EXISTS idx_members_genealogy
 ON members(genealogy_id);

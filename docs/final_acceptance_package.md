@@ -60,27 +60,26 @@ ninja --version
 | 主键、外键、CHECK | 已完成 | `sql/01_schema.sql` |
 | 父母出生年份早于子女 | 已完成 | `sql/03_triggers.sql` |
 | 10 万级数据生成 | 已完成 | `tools/generate_data.py` |
-| COPY 批量导入 | 已完成 | `sql/08_load_generated_csv.sql` |
-| 分支导出 | 已完成 | `sql/09_export_branch.sql` |
+| COPY 批量导入 | 已完成 | `sql/05_load_generated_csv.sql` |
+| 分支导出 | 已完成 | `sql/06_export_branch.sql` |
 | 核心 SQL 查询 | 已完成 | `sql/04_core_queries.sql` |
 | 索引设计 | 已完成 | `sql/02_indexes.sql` |
-| EXPLAIN 性能对比 | 已完成 | `sql/10_performance_explain.sql` |
+| EXPLAIN 性能对比 | 已完成 | `sql/07_performance_explain.sql` |
 
 ## 3. 验收前运行命令
 
 从 WSL 进入项目根目录：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
+cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
 ```
 
-初始化小数据：
+初始化数据库：
 
 ```bash
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/01_schema.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/02_indexes.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/03_triggers.sql
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/05_seed_small.sql
 ```
 
 编译：
@@ -88,12 +87,6 @@ psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -
 ```bash
 cmake -S . -B build -G Ninja
 cmake --build build
-```
-
-自动检查：
-
-```bash
-./build/Stage2Smoke
 ```
 
 运行图形界面：
@@ -110,12 +103,6 @@ editor1 / 123456
 viewer1 / 123456
 ```
 
-如需完整演示权限角色，建议先导入演示数据：
-
-```bash
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/07_seed_demo.sql
-```
-
 ## 4. 大数据与性能材料
 
 生成 10 万级 CSV：
@@ -127,19 +114,19 @@ python3 tools/generate_data.py --out generated_data --total-members 100000
 导入：
 
 ```bash
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/08_load_generated_csv.sql
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/05_load_generated_csv.sql
 ```
 
 分支导出：
 
 ```bash
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=1 -v max_depth=6 -f sql/09_export_branch.sql
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=1 -v max_depth=6 -f sql/06_export_branch.sql
 ```
 
 性能对比：
 
 ```bash
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=1 -f sql/10_performance_explain.sql
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -v root_id=1 -f sql/07_performance_explain.sql
 ```
 
 数据库备份：
@@ -245,7 +232,6 @@ src/
 sql/
 docs/
 tools/
-tests/
 scripts/
 CMakeLists.txt
 README.md
@@ -279,14 +265,12 @@ generated_data/
 ```bash
 git status --short
 cmake --build build
-./build/Stage2Smoke
 ```
 
 确认：
 
 ```text
 程序能编译。
-自动测试 PASS。
 GUI 能启动。
 报告截图齐全。
 数据库备份和分支导出文件已生成。

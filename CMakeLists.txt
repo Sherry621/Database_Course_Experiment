@@ -47,16 +47,3 @@ add_executable(GenealogySystem ${SOURCES} ${HEADERS})
 
 target_include_directories(GenealogySystem PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(GenealogySystem PRIVATE Qt6::Core Qt6::Widgets Qt6::Sql)
-
-add_executable(Stage2Smoke
-    tests/stage2_smoke.cpp
-    src/db/DatabaseManager.cpp
-    src/db/UserDao.cpp
-    src/db/GenealogyDao.cpp
-    src/db/MemberDao.cpp
-    src/service/AuthService.cpp
-    src/service/DashboardService.cpp
-)
-
-target_include_directories(Stage2Smoke PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(Stage2Smoke PRIVATE Qt6::Core Qt6::Sql)

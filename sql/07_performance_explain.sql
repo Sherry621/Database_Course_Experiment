@@ -6,7 +6,7 @@
 -- Example:
 --   psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" \
 --     -v root_id=1 \
---     -f sql/10_performance_explain.sql
+--     -f sql/07_performance_explain.sql
 
 \if :{?root_id}
 \else

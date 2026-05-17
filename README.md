@@ -72,8 +72,6 @@
 │   ├── model/
 │   ├── service/
 │   └── ui/
-├── tests/
-│   └── stage2_smoke.cpp
 ├── tools/
 │   └── generate_data.py
 └── scripts/
@@ -87,7 +85,7 @@
 - `docs/system_design.md`：课程设计完整方案说明。
 - `docs/usage.md`：环境配置、数据库初始化、编译运行和中文输入说明。
 - `docs/chinese_input_guide.md`：Qt 图形界面中文显示与拼音输入完整配置方案。
-- `docs/data_and_tests.md`：阶段验收、10 万数据、导入导出和性能测试结果。
+- `docs/data_and_tests.md`：10 万数据、导入导出和性能测试结果。
 - `docs/report_materials.md`：ER 图、关系模型、主外键、3NF/BCNF 和报告截图建议。
 - `docs/planning_and_work.md`：实现路线、演示顺序和两人分工建议。
 - `docs/project_structure.md`：项目目录结构说明。
@@ -95,7 +93,6 @@
 - `docs/acceptance_checklist.md`：最终验收检查清单。
 - `sql/`：PostgreSQL 数据库脚本。
 - `src/`：Qt/C++ 主程序源码。
-- `tests/`：自动验收和测试程序。
 - `tools/`：数据生成工具。
 - `scripts/`：WSL 运行和输入法辅助脚本。
 
@@ -116,9 +113,9 @@
 - `sql/02_indexes.sql`：索引脚本
 - `sql/03_triggers.sql`：触发器脚本
 - `sql/04_core_queries.sql`：课程要求核心查询
-- `sql/08_load_generated_csv.sql`：10 万级 CSV 批量导入
-- `sql/09_export_branch.sql`：分支导出备份
-- `sql/10_performance_explain.sql`：索引性能对比 EXPLAIN
+- `sql/05_load_generated_csv.sql`：10 万级 CSV 批量导入
+- `sql/06_export_branch.sql`：分支导出备份
+- `sql/07_performance_explain.sql`：索引性能对比 EXPLAIN
 - `tools/generate_data.py`：模拟数据生成工具
 
 ## 环境准备
@@ -309,7 +306,7 @@ sudo apt-get install -y fcitx5 fcitx5-chinese-addons fcitx5-frontend-qt6
 
 - [系统框架说明](docs/system_framework.md)
 - [使用与环境配置](docs/usage.md)
-- [数据工程与阶段验收](docs/data_and_tests.md)
+- [数据工程与验收](docs/data_and_tests.md)
 - [报告材料：ER 图、关系模型与范式分析](docs/report_materials.md)
 - [实现路线与分工](docs/planning_and_work.md)
 - [文件结构说明](docs/project_structure.md)

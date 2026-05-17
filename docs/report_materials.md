@@ -312,7 +312,7 @@ idx_marriages_person1                查询成员婚姻关系
 idx_marriages_person2                查询成员婚姻关系
 ```
 
-`idx_members_name_trgm` 使用 PostgreSQL `pg_trgm` 扩展和 GIN 索引，适合 `LIKE '%关键字%'` 类型的姓名模糊查询。性能对比脚本为 `sql/10_performance_explain.sql`。
+`idx_members_name_trgm` 使用 PostgreSQL `pg_trgm` 扩展和 GIN 索引，适合 `LIKE '%关键字%'` 类型的姓名模糊查询。性能对比脚本为 `sql/07_performance_explain.sql`。
 
 ## 9. 报告截图建议
 
@@ -320,7 +320,7 @@ idx_marriages_person2                查询成员婚姻关系
 
 ```text
 数据库建表、索引、触发器执行成功截图
-Stage2Smoke 自动验收通过截图
+项目构建成功截图
 登录/注册界面截图
 Dashboard 统计截图
 族谱管理截图

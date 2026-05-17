@@ -55,23 +55,17 @@ CREATE DATABASE genealogy_lab OWNER genealogy_user;
 执行初始化脚本：
 
 ```bash
-cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
+cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/01_schema.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/02_indexes.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/03_triggers.sql
-```
-
-导入小测试数据：
-
-```bash
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/05_seed_small.sql
 ```
 
 导入 10 万级数据：
 
 ```bash
 python3 tools/generate_data.py --out generated_data --total-members 100000
-psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/08_load_generated_csv.sql
+psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/05_load_generated_csv.sql
 ```
 
 ## 3. 编译运行
@@ -133,19 +127,7 @@ IM_MODULE_CLASSNAME=fcitx::QFcitxPlatformInputContext
 
 如果只看到 `QComposeInputContext`，说明当前启动环境没有让 Qt6 接入 fcitx。此时不要直接运行 `./build/GenealogySystem`，需要用 `./scripts/run_wsl.sh` 启动。
 
-## 5. 自动验收
-
-```bash
-./build/Stage2Smoke
-```
-
-通过时输出：
-
-```text
-PASS: login, genealogy loading, dashboard, and member list are working.
-```
-
-## 6. 常见问题
+## 5. 常见问题
 
 ### CMakeCache 路径不一致
 

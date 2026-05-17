@@ -18,7 +18,6 @@ shujuku/
 │   └── ui/
 ├── sql/
 ├── tools/
-├── tests/
 ├── scripts/
 └── docs/
 ```
@@ -33,7 +32,6 @@ shujuku/
 | `src/ui/` | Qt 图形界面层，负责窗口、表单、按钮、图形化展示 |
 | `sql/` | 数据库建表、索引、触发器、核心查询、导入导出和性能测试 |
 | `tools/` | 数据生成工具，用于生成 10 万级 CSV 数据 |
-| `tests/` | 自动冒烟测试 |
 | `scripts/` | WSL 运行脚本和中文输入法配置脚本 |
 | `docs/` | 系统设计、验收资料、报告材料和使用说明 |
 
@@ -55,17 +53,13 @@ find_package(Qt6 REQUIRED COMPONENTS Core Widgets Sql)
 - `Widgets`：桌面图形界面。
 - `Sql`：连接 PostgreSQL 数据库。
 
-项目构建两个可执行文件：
+项目构建一个图形化主程序：
 
 ```text
 GenealogySystem
-Stage2Smoke
 ```
 
-其中：
-
-- `GenealogySystem` 是主程序。
-- `Stage2Smoke` 是自动冒烟测试程序，用于验证数据库连接、登录、族谱加载、Dashboard 和成员列表。
+`GenealogySystem` 是最终演示使用的 Qt 桌面程序。
 
 ## 3. 程序启动流程
 
@@ -750,7 +744,7 @@ idx_parent_child_child_id
 WITH RECURSIVE ancestors AS (...)
 ```
 
-### `sql/05_seed_small.sql`
+### `早期小数据脚本`
 
 小规模测试数据。
 
@@ -768,7 +762,7 @@ admin / 123456
 editor1 / 123456
 ```
 
-### `sql/07_seed_demo.sql`
+### `早期演示数据脚本`
 
 演示数据，比小数据更适合展示权限和界面功能。
 
@@ -785,7 +779,7 @@ viewer1
 协作者角色
 ```
 
-### `sql/08_load_generated_csv.sql`
+### `sql/05_load_generated_csv.sql`
 
 使用 PostgreSQL `COPY` 或 `\copy` 从 CSV 批量导入数据。
 
@@ -800,7 +794,7 @@ parent_child_relations.csv
 marriages.csv
 ```
 
-### `sql/09_export_branch.sql`
+### `sql/06_export_branch.sql`
 
 导出某个成员的后代分支。
 
@@ -816,7 +810,7 @@ WITH RECURSIVE descendant_ids AS (...)
 generated_data/branch_export.csv
 ```
 
-### `sql/10_performance_explain.sql`
+### `sql/07_performance_explain.sql`
 
 用于索引性能对比。
 
@@ -863,11 +857,11 @@ parent_child_relations.csv
 marriages.csv
 ```
 
-生成后通过 `sql/08_load_generated_csv.sql` 批量导入 PostgreSQL。
+生成后通过 `sql/05_load_generated_csv.sql` 批量导入 PostgreSQL。
 
 ## 10. 测试文件
 
-### `tests/stage2_smoke.cpp`
+### `已删除的早期冒烟测试脚本`
 
 自动冒烟测试。
 
@@ -939,7 +933,7 @@ QT_QPA_PLATFORM=xcb
 4. 讲权限控制：owner/editor/viewer，按钮禁用和写操作二次校验。
 5. 讲性能优化：姓名模糊查询索引、parent_id 索引、EXPLAIN 对比。
 6. 讲数据工程：Python 生成 10 万数据，COPY 导入，分支导出。
-7. 最后讲自动测试：Stage2Smoke 验证核心流程。
+7. 最后讲自动测试：自动冒烟测试 验证核心流程。
 ```
 
 ## 13. 项目实现亮点
