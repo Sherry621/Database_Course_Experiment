@@ -176,7 +176,7 @@ CREATE DATABASE genealogy_lab OWNER genealogy_user;
 执行初始化脚本：
 
 ```bash
-cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/01_schema.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -f sql/02_indexes.sql
@@ -215,7 +215,7 @@ VALUES ('张氏族谱', '张', 1, '测试族谱');
 进入项目目录：
 
 ```bash
-cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 ```
 
 使用当前项目下的 `build/` 构建目录：
@@ -315,6 +315,11 @@ sudo apt-get install -y fcitx5 fcitx5-chinese-addons fcitx5-frontend-qt6
 - [文件结构说明](docs/project_structure.md)
 - [GitHub 上传步骤](docs/github_upload.md)
 - [验收检查清单](docs/acceptance_checklist.md)
+- [最终验收资料包](docs/final_acceptance_package.md)
+- [项目文件结构与关键代码实现原理](docs/code_structure_and_principles.md)
+- [SQL 语句代码详细解析](docs/sql_code_analysis.md)
+- [实验报告提交材料说明](docs/experiment_report_submission_guide.md)
+- [验收常见问题与参考回答](docs/acceptance_q_and_a.md)
 
 ## 分工建议
 

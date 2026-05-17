@@ -55,7 +55,7 @@ CREATE DATABASE genealogy_lab OWNER genealogy_user;
 执行初始化脚本：
 
 ```bash
-cd Database_Course_Experiment
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/01_schema.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/02_indexes.sql
 psql "postgresql://genealogy_user:genealogy_pass@localhost:5432/genealogy_lab" -v ON_ERROR_STOP=1 -f sql/03_triggers.sql

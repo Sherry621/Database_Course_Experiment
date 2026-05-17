@@ -5,7 +5,7 @@
 确认当前根目录是：
 
 ```bash
-cd "/home/xsy/mySchoolProject/Database Course lab/Database_Course_Experiment"
+cd "/mnt/c/Users/Sherry Peng/OneDrive/桌面/shujuku"
 ```
 
 查看将被 Git 管理的文件：

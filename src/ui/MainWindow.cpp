@@ -1,7 +1,13 @@
 #include "MainWindow.h"
 
+#include <algorithm>
+
 #include <QComboBox>
 #include <QFormLayout>
+#include <QGraphicsItem>
+#include <QGraphicsScene>
+#include <QGraphicsTextItem>
+#include <QGraphicsView>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHBoxLayout>
@@ -11,9 +17,13 @@
 #include <QLineEdit>
 #include <QListWidget>
 #include <QMessageBox>
+#include <QPainter>
+#include <QPainterPath>
+#include <QPolygonF>
 #include <QPushButton>
 #include <QStackedWidget>
 #include <QTableWidget>
+#include <QTableWidgetItem>
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
@@ -21,6 +31,63 @@
 #include "ui/MemberDialog.h"
 
 namespace {
+constexpr qreal NodeWidth = 150.0;
+constexpr qreal NodeHeight = 56.0;
+constexpr qreal HorizontalGap = 36.0;
+constexpr qreal VerticalGap = 112.0;
+constexpr qreal RelationCardWidth = 156.0;
+constexpr qreal RelationCardHeight = 64.0;
+constexpr qreal RelationGap = 74.0;
+constexpr qreal MinReadableSceneScale = 0.72;
+constexpr int MemberIdItemDataKey = 1;
+
+void configureReadableGraphicsView(QGraphicsView* view) {
+    view->setRenderHint(QPainter::Antialiasing, true);
+    view->setDragMode(QGraphicsView::ScrollHandDrag);
+    view->setAlignment(Qt::AlignCenter);
+    view->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    view->setResizeAnchor(QGraphicsView::AnchorViewCenter);
+    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    view->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+}
+
+void fitGraphicsView(QGraphicsView* view, QGraphicsScene* scene) {
+    const QRectF sceneRect = scene->sceneRect();
+    if (sceneRect.isEmpty()) {
+        return;
+    }
+    view->resetTransform();
+    view->fitInView(sceneRect, Qt::KeepAspectRatio);
+}
+
+void showSceneReadable(QGraphicsView* view, QGraphicsScene* scene, const QPointF& focusPoint) {
+    const QRectF sceneRect = scene->sceneRect();
+    if (sceneRect.isEmpty()) {
+        return;
+    }
+
+    view->resetTransform();
+    const QSize viewportSize = view->viewport()->size();
+    if (!viewportSize.isEmpty()) {
+        const qreal widthScale = (viewportSize.width() - 24.0) / sceneRect.width();
+        const qreal heightScale = (viewportSize.height() - 24.0) / sceneRect.height();
+        const qreal fitScale = std::min({1.0, widthScale, heightScale});
+        if (fitScale >= MinReadableSceneScale) {
+            view->scale(fitScale, fitScale);
+        }
+    }
+    view->centerOn(focusPoint);
+}
+
+void zoomGraphicsView(QGraphicsView* view, qreal factor) {
+    const qreal currentScale = view->transform().m11();
+    const qreal nextScale = currentScale * factor;
+    if (nextScale < 0.35 || nextScale > 2.8) {
+        return;
+    }
+    view->scale(factor, factor);
+}
+
 bool parsePositiveInt(const QLineEdit* edit, const QString& fieldName, int& value, QString& error) {
     bool ok = false;
     value = edit->text().trimmed().toInt(&ok);
@@ -57,6 +124,31 @@ QString memberLabel(const std::optional<Member>& member, int memberId) {
     }
     return QString("%1(#%2)").arg(member->name).arg(member->memberId);
 }
+
+QTableWidgetItem* textItem(const QString& text) {
+    auto* item = new QTableWidgetItem(text);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    return item;
+}
+
+QTableWidgetItem* numberItem(int value) {
+    auto* item = new QTableWidgetItem();
+    item->setData(Qt::DisplayRole, value);
+    item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+    return item;
+}
+
+QString memberDetailText(const Member& member) {
+    return QString(
+        "ID：%1\n姓名：%2\n性别：%3\n出生年：%4\n死亡年：%5\n代数：%6\n生平简介：%7")
+        .arg(member.memberId)
+        .arg(member.name)
+        .arg(genderText(member.gender))
+        .arg(member.birthYear)
+        .arg(member.deathYear)
+        .arg(member.generation)
+        .arg(member.biography);
+}
 }
 
 MainWindow::MainWindow(const User& user, QWidget* parent) : QMainWindow(parent), user_(user) {
@@ -88,6 +180,9 @@ void MainWindow::buildUi() {
     auto* topLayout = new QHBoxLayout();
     topLayout->addWidget(new QLabel("当前族谱", this));
     topLayout->addWidget(genealogyCombo_, 1);
+    roleLabel_ = new QLabel(this);
+    roleLabel_->setMinimumWidth(120);
+    topLayout->addWidget(roleLabel_);
 
     auto* contentLayout = new QVBoxLayout();
     contentLayout->addLayout(topLayout);
@@ -115,11 +210,11 @@ QWidget* MainWindow::buildDashboardPage() {
     statsLayout->addWidget(statsLabel_);
 
     auto* quickBox = new QGroupBox("常用操作", page);
-    auto* addMemberButton = new QPushButton("新增成员", quickBox);
+    dashboardAddMemberButton_ = new QPushButton("新增成员", quickBox);
     auto* treeButton = new QPushButton("查看族谱树", quickBox);
     auto* relationButton = new QPushButton("亲属关系查询", quickBox);
     auto* refreshButton = new QPushButton("刷新统计", quickBox);
-    connect(addMemberButton, &QPushButton::clicked, this, [this]() {
+    connect(dashboardAddMemberButton_, &QPushButton::clicked, this, [this]() {
         navigation_->setCurrentRow(2);
         addMember();
     });
@@ -132,7 +227,7 @@ QWidget* MainWindow::buildDashboardPage() {
     connect(refreshButton, &QPushButton::clicked, this, &MainWindow::reloadDashboard);
 
     auto* quickLayout = new QGridLayout(quickBox);
-    quickLayout->addWidget(addMemberButton, 0, 0);
+    quickLayout->addWidget(dashboardAddMemberButton_, 0, 0);
     quickLayout->addWidget(treeButton, 0, 1);
     quickLayout->addWidget(relationButton, 1, 0);
     quickLayout->addWidget(refreshButton, 1, 1);
@@ -164,20 +259,20 @@ QWidget* MainWindow::buildGenealogyPage() {
     genealogyInfoLabel_ = new QLabel(page);
     genealogyInfoLabel_->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
-    auto* addButton = new QPushButton("新增族谱", page);
-    auto* editButton = new QPushButton("编辑族谱", page);
-    auto* deleteButton = new QPushButton("删除族谱", page);
-    auto* inviteButton = new QPushButton("邀请协作者", page);
-    connect(addButton, &QPushButton::clicked, this, &MainWindow::addGenealogy);
-    connect(editButton, &QPushButton::clicked, this, &MainWindow::editGenealogy);
-    connect(deleteButton, &QPushButton::clicked, this, &MainWindow::deleteGenealogy);
-    connect(inviteButton, &QPushButton::clicked, this, &MainWindow::inviteCollaborator);
+    genealogyAddButton_ = new QPushButton("新增族谱", page);
+    genealogyEditButton_ = new QPushButton("编辑族谱", page);
+    genealogyDeleteButton_ = new QPushButton("删除族谱", page);
+    genealogyInviteButton_ = new QPushButton("邀请协作者", page);
+    connect(genealogyAddButton_, &QPushButton::clicked, this, &MainWindow::addGenealogy);
+    connect(genealogyEditButton_, &QPushButton::clicked, this, &MainWindow::editGenealogy);
+    connect(genealogyDeleteButton_, &QPushButton::clicked, this, &MainWindow::deleteGenealogy);
+    connect(genealogyInviteButton_, &QPushButton::clicked, this, &MainWindow::inviteCollaborator);
 
     auto* toolbar = new QHBoxLayout();
-    toolbar->addWidget(addButton);
-    toolbar->addWidget(editButton);
-    toolbar->addWidget(deleteButton);
-    toolbar->addWidget(inviteButton);
+    toolbar->addWidget(genealogyAddButton_);
+    toolbar->addWidget(genealogyEditButton_);
+    toolbar->addWidget(genealogyDeleteButton_);
+    toolbar->addWidget(genealogyInviteButton_);
     toolbar->addStretch();
 
     auto* layout = new QVBoxLayout(page);
@@ -194,30 +289,32 @@ QWidget* MainWindow::buildMemberPage() {
     memberSearchEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
 
     auto* searchButton = new QPushButton("搜索", page);
-    auto* addButton = new QPushButton("新增成员", page);
-    auto* editButton = new QPushButton("编辑成员", page);
+    memberAddButton_ = new QPushButton("新增成员", page);
+    memberEditButton_ = new QPushButton("编辑成员", page);
     auto* detailButton = new QPushButton("成员详情", page);
-    auto* deleteButton = new QPushButton("删除成员", page);
+    memberDeleteButton_ = new QPushButton("删除成员", page);
     connect(searchButton, &QPushButton::clicked, this, &MainWindow::reloadMembers);
-    connect(addButton, &QPushButton::clicked, this, &MainWindow::addMember);
-    connect(editButton, &QPushButton::clicked, this, &MainWindow::editMember);
+    connect(memberAddButton_, &QPushButton::clicked, this, &MainWindow::addMember);
+    connect(memberEditButton_, &QPushButton::clicked, this, &MainWindow::editMember);
     connect(detailButton, &QPushButton::clicked, this, &MainWindow::showMemberDetail);
-    connect(deleteButton, &QPushButton::clicked, this, &MainWindow::deleteMember);
+    connect(memberDeleteButton_, &QPushButton::clicked, this, &MainWindow::deleteMember);
 
     auto* toolbar = new QHBoxLayout();
     toolbar->addWidget(memberSearchEdit_);
     toolbar->addWidget(searchButton);
-    toolbar->addWidget(addButton);
-    toolbar->addWidget(editButton);
+    toolbar->addWidget(memberAddButton_);
+    toolbar->addWidget(memberEditButton_);
     toolbar->addWidget(detailButton);
-    toolbar->addWidget(deleteButton);
+    toolbar->addWidget(memberDeleteButton_);
 
     memberTable_ = new QTableWidget(page);
     memberTable_->setColumnCount(6);
     memberTable_->setHorizontalHeaderLabels({"ID", "姓名", "性别", "出生年", "死亡年", "代数"});
     memberTable_->horizontalHeader()->setStretchLastSection(true);
+    memberTable_->horizontalHeader()->setSortIndicatorShown(true);
     memberTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
     memberTable_->setSelectionMode(QAbstractItemView::SingleSelection);
+    memberTable_->setSortingEnabled(true);
 
     auto* layout = new QVBoxLayout(page);
     layout->addLayout(toolbar);
@@ -234,14 +331,14 @@ QWidget* MainWindow::buildRelationManagePage() {
     parentTypeCombo_->addItem("父亲", "father");
     parentTypeCombo_->addItem("母亲", "mother");
 
-    auto* addParentChildButton = new QPushButton("添加亲子关系", page);
-    connect(addParentChildButton, &QPushButton::clicked, this, &MainWindow::addParentChildRelation);
+    addParentChildButton_ = new QPushButton("添加亲子关系", page);
+    connect(addParentChildButton_, &QPushButton::clicked, this, &MainWindow::addParentChildRelation);
 
     auto* parentForm = new QFormLayout();
     parentForm->addRow("父/母成员 ID", parentIdEdit_);
     parentForm->addRow("子女成员 ID", childIdEdit_);
     parentForm->addRow("关系类型", parentTypeCombo_);
-    parentForm->addRow(addParentChildButton);
+    parentForm->addRow(addParentChildButton_);
 
     spouseAEdit_ = new QLineEdit(page);
     spouseBEdit_ = new QLineEdit(page);
@@ -250,8 +347,8 @@ QWidget* MainWindow::buildRelationManagePage() {
     marriageDescriptionEdit_ = new QLineEdit(page);
     marriageDescriptionEdit_->setAttribute(Qt::WA_InputMethodEnabled, true);
 
-    auto* addMarriageButton = new QPushButton("添加婚姻关系", page);
-    connect(addMarriageButton, &QPushButton::clicked, this, &MainWindow::addMarriageRelation);
+    addMarriageButton_ = new QPushButton("添加婚姻关系", page);
+    connect(addMarriageButton_, &QPushButton::clicked, this, &MainWindow::addMarriageRelation);
 
     auto* marriageForm = new QFormLayout();
     marriageForm->addRow("成员 A ID", spouseAEdit_);
@@ -259,7 +356,7 @@ QWidget* MainWindow::buildRelationManagePage() {
     marriageForm->addRow("结婚年份", marriageYearEdit_);
     marriageForm->addRow("离婚年份", divorceYearEdit_);
     marriageForm->addRow("备注", marriageDescriptionEdit_);
-    marriageForm->addRow(addMarriageButton);
+    marriageForm->addRow(addMarriageButton_);
 
     auto* layout = new QVBoxLayout(page);
     layout->addWidget(new QLabel("血缘关系维护", page));
@@ -280,18 +377,46 @@ QWidget* MainWindow::buildTreePage() {
 
     auto* buildButton = new QPushButton("生成后代树", page);
     connect(buildButton, &QPushButton::clicked, this, &MainWindow::buildTreePreview);
+    auto* zoomInButton = new QPushButton("+", page);
+    zoomInButton->setToolTip("放大树形图");
+    auto* zoomOutButton = new QPushButton("-", page);
+    zoomOutButton->setToolTip("缩小树形图");
+    auto* resetZoomButton = new QPushButton("1:1", page);
+    resetZoomButton->setToolTip("恢复节点原始大小");
+    auto* fitButton = new QPushButton("适应窗口", page);
+    fitButton->setToolTip("把整棵树缩放到当前窗口内");
 
     auto* toolbar = new QHBoxLayout();
     toolbar->addWidget(treeRootEdit_);
     toolbar->addWidget(treeDepthEdit_);
     toolbar->addWidget(buildButton);
+    toolbar->addWidget(zoomInButton);
+    toolbar->addWidget(zoomOutButton);
+    toolbar->addWidget(resetZoomButton);
+    toolbar->addWidget(fitButton);
 
-    treeWidget_ = new QTreeWidget(page);
-    treeWidget_->setHeaderLabel("后代分支");
+    descendantTreeScene_ = new QGraphicsScene(page);
+    connect(descendantTreeScene_, &QGraphicsScene::selectionChanged, this, &MainWindow::showDescendantNodeDetail);
+    descendantTreeView_ = new QGraphicsView(descendantTreeScene_, page);
+    configureReadableGraphicsView(descendantTreeView_);
+    descendantTreeView_->setMinimumHeight(420);
+    connect(zoomInButton, &QPushButton::clicked, this, [this]() {
+        zoomGraphicsView(descendantTreeView_, 1.18);
+    });
+    connect(zoomOutButton, &QPushButton::clicked, this, [this]() {
+        zoomGraphicsView(descendantTreeView_, 1.0 / 1.18);
+    });
+    connect(resetZoomButton, &QPushButton::clicked, this, [this]() {
+        descendantTreeView_->resetTransform();
+        descendantTreeView_->centerOn(descendantTreeScene_->sceneRect().center());
+    });
+    connect(fitButton, &QPushButton::clicked, this, [this]() {
+        fitGraphicsView(descendantTreeView_, descendantTreeScene_);
+    });
 
     auto* layout = new QVBoxLayout(page);
     layout->addLayout(toolbar);
-    layout->addWidget(treeWidget_);
+    layout->addWidget(descendantTreeView_);
     return page;
 }
 
@@ -330,6 +455,39 @@ QWidget* MainWindow::buildRelationPage() {
     relationResultLabel_->setWordWrap(true);
     relationResultLabel_->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
+    relationPathScene_ = new QGraphicsScene(page);
+    relationPathView_ = new QGraphicsView(relationPathScene_, page);
+    configureReadableGraphicsView(relationPathView_);
+    relationPathView_->setMinimumHeight(260);
+    auto* pathZoomInButton = new QPushButton("+", page);
+    pathZoomInButton->setToolTip("放大链路图");
+    auto* pathZoomOutButton = new QPushButton("-", page);
+    pathZoomOutButton->setToolTip("缩小链路图");
+    auto* pathResetButton = new QPushButton("1:1", page);
+    pathResetButton->setToolTip("恢复节点原始大小");
+    auto* pathFitButton = new QPushButton("适应窗口", page);
+    pathFitButton->setToolTip("把整条链路缩放到当前窗口内");
+
+    auto* pathToolbar = new QHBoxLayout();
+    pathToolbar->addStretch();
+    pathToolbar->addWidget(pathZoomInButton);
+    pathToolbar->addWidget(pathZoomOutButton);
+    pathToolbar->addWidget(pathResetButton);
+    pathToolbar->addWidget(pathFitButton);
+    connect(pathZoomInButton, &QPushButton::clicked, this, [this]() {
+        zoomGraphicsView(relationPathView_, 1.18);
+    });
+    connect(pathZoomOutButton, &QPushButton::clicked, this, [this]() {
+        zoomGraphicsView(relationPathView_, 1.0 / 1.18);
+    });
+    connect(pathResetButton, &QPushButton::clicked, this, [this]() {
+        relationPathView_->resetTransform();
+        relationPathView_->centerOn(relationPathScene_->sceneRect().center());
+    });
+    connect(pathFitButton, &QPushButton::clicked, this, [this]() {
+        fitGraphicsView(relationPathView_, relationPathScene_);
+    });
+
     auto* form = new QFormLayout();
     form->addRow("成员 A", relationAEdit_);
     form->addRow("成员 B", relationBEdit_);
@@ -338,6 +496,8 @@ QWidget* MainWindow::buildRelationPage() {
     layout->addLayout(form);
     layout->addWidget(queryButton);
     layout->addWidget(relationResultLabel_);
+    layout->addLayout(pathToolbar);
+    layout->addWidget(relationPathView_);
     layout->addStretch();
     return page;
 }
@@ -371,6 +531,7 @@ void MainWindow::reloadDashboard() {
         if (genealogyInfoLabel_) {
             genealogyInfoLabel_->setText("当前用户暂无可访问族谱。");
         }
+        updatePermissionUi();
         return;
     }
 
@@ -386,23 +547,27 @@ void MainWindow::reloadDashboard() {
     }
 
     const auto stats = dashboardService_.loadStats(genealogyId);
+    const double maleRatio = stats.totalMembers > 0 ? stats.maleMembers * 100.0 / stats.totalMembers : 0.0;
+    const double femaleRatio = stats.totalMembers > 0 ? stats.femaleMembers * 100.0 / stats.totalMembers : 0.0;
     statsLabel_->setText(QString(
         "当前登录用户：%1（ID：%2）\n"
         "可访问族谱数量：%3\n"
         "当前族谱：%4\n"
         "成员总数：%5\n"
-        "男性人数：%6\n"
-        "女性人数：%7\n"
-        "最大代数：%8\n"
-        "血缘关系数：%9\n"
-        "婚姻关系数：%10")
+        "男性人数：%6（%7%）\n"
+        "女性人数：%8（%9%）\n"
+        "最大代数：%10\n"
+        "血缘关系数：%11\n"
+        "婚姻关系数：%12")
         .arg(user_.realName.isEmpty() ? user_.username : user_.realName)
         .arg(user_.userId)
         .arg(genealogyCombo_->count())
         .arg(genealogyCombo_->currentText())
         .arg(stats.totalMembers)
         .arg(stats.maleMembers)
+        .arg(maleRatio, 0, 'f', 1)
         .arg(stats.femaleMembers)
+        .arg(femaleRatio, 0, 'f', 1)
         .arg(stats.maxGeneration)
         .arg(stats.parentChildRelations)
         .arg(stats.marriages));
@@ -419,6 +584,7 @@ void MainWindow::reloadDashboard() {
             recentMembersTable_->setItem(row, 4, new QTableWidgetItem(member.generation == 0 ? QString() : QString::number(member.generation)));
         }
     }
+    updatePermissionUi();
 }
 
 void MainWindow::addGenealogy() {
@@ -433,6 +599,10 @@ void MainWindow::addGenealogy() {
 }
 
 void MainWindow::editGenealogy() {
+    if (!ensureCanManageCurrentGenealogy("编辑族谱")) {
+        return;
+    }
+
     const auto genealogy = genealogyDao_.findById(currentGenealogyId());
     if (!genealogy.has_value()) {
         QMessageBox::warning(this, "编辑失败", "请先选择族谱。");
@@ -453,6 +623,9 @@ void MainWindow::deleteGenealogy() {
     if (currentGenealogyId() == 0) {
         return;
     }
+    if (!ensureCanManageCurrentGenealogy("删除族谱")) {
+        return;
+    }
 
     if (QMessageBox::question(this, "确认删除", "删除族谱会同时删除成员和关系，是否继续？")
         != QMessageBox::Yes) {
@@ -467,37 +640,65 @@ void MainWindow::deleteGenealogy() {
 }
 
 void MainWindow::inviteCollaborator() {
+    if (!ensureCanManageCurrentGenealogy("邀请协作者")) {
+        return;
+    }
+
     bool ok = false;
     const QString username = QInputDialog::getText(this, "邀请协作者", "请输入用户名：", QLineEdit::Normal, {}, &ok);
     if (!ok || username.trimmed().isEmpty()) {
         return;
     }
 
-    if (!genealogyDao_.addCollaboratorByUsername(currentGenealogyId(), username.trimmed(), "editor")) {
+    const QStringList roleLabels = {"编辑者：可维护成员和关系", "查看者：只能浏览和查询"};
+    const QString roleLabel = QInputDialog::getItem(this,
+                                                   "设置协作权限",
+                                                   "请选择协作者角色：",
+                                                   roleLabels,
+                                                   0,
+                                                   false,
+                                                   &ok);
+    if (!ok || roleLabel.isEmpty()) {
+        return;
+    }
+    const QString role = roleLabel.startsWith("编辑者") ? "editor" : "viewer";
+
+    if (!genealogyDao_.addCollaboratorByUsername(currentGenealogyId(), username.trimmed(), role)) {
         QMessageBox::warning(this, "邀请失败", genealogyDao_.lastError());
         return;
     }
-    QMessageBox::information(this, "邀请成功", "协作者已加入当前族谱。");
+    QMessageBox::information(this, "邀请成功", role == "editor" ? "协作者已加入当前族谱，可编辑数据。" : "协作者已加入当前族谱，仅可查看数据。");
+    updatePermissionUi();
 }
 
 void MainWindow::reloadMembers() {
+    const int sortColumn = memberTable_->horizontalHeader()->sortIndicatorSection();
+    const Qt::SortOrder sortOrder = memberTable_->horizontalHeader()->sortIndicatorOrder();
+    memberTable_->setSortingEnabled(false);
+
     const auto members = memberDao_.findByGenealogy(currentGenealogyId(), memberSearchEdit_->text().trimmed());
     memberTable_->setRowCount(static_cast<int>(members.size()));
 
     for (int row = 0; row < static_cast<int>(members.size()); ++row) {
         const auto& member = members[row];
-        memberTable_->setItem(row, 0, new QTableWidgetItem(QString::number(member.memberId)));
-        memberTable_->setItem(row, 1, new QTableWidgetItem(member.name));
-        memberTable_->setItem(row, 2, new QTableWidgetItem(genderText(member.gender)));
-        memberTable_->setItem(row, 3, new QTableWidgetItem(QString::number(member.birthYear)));
-        memberTable_->setItem(row, 4, new QTableWidgetItem(QString::number(member.deathYear)));
-        memberTable_->setItem(row, 5, new QTableWidgetItem(QString::number(member.generation)));
+        memberTable_->setItem(row, 0, numberItem(member.memberId));
+        memberTable_->setItem(row, 1, textItem(member.name));
+        memberTable_->setItem(row, 2, textItem(genderText(member.gender)));
+        memberTable_->setItem(row, 3, numberItem(member.birthYear));
+        memberTable_->setItem(row, 4, numberItem(member.deathYear));
+        memberTable_->setItem(row, 5, numberItem(member.generation));
     }
+
+    memberTable_->setSortingEnabled(true);
+    memberTable_->sortItems(sortColumn, sortOrder);
 }
 
 void MainWindow::addMember() {
     if (currentGenealogyId() == 0) {
         QMessageBox::warning(this, "新增失败", "请先创建或选择族谱。");
+        return;
+    }
+    if (!ensureCanEditCurrentData("新增成员")) {
         return;
     }
 
@@ -513,6 +714,10 @@ void MainWindow::addMember() {
 }
 
 void MainWindow::editMember() {
+    if (!ensureCanEditCurrentData("编辑成员")) {
+        return;
+    }
+
     const int memberId = selectedMemberId();
     const auto member = memberDao_.findById(memberId);
     if (!member.has_value()) {
@@ -532,6 +737,10 @@ void MainWindow::editMember() {
 }
 
 void MainWindow::deleteMember() {
+    if (!ensureCanEditCurrentData("删除成员")) {
+        return;
+    }
+
     const int memberId = selectedMemberId();
     if (memberId == 0) {
         QMessageBox::warning(this, "删除失败", "请先选择成员。");
@@ -559,20 +768,15 @@ void MainWindow::showMemberDetail() {
         return;
     }
 
-    QMessageBox::information(this, "成员详情", QString(
-        "ID：%1\n姓名：%2\n性别：%3\n出生年：%4\n死亡年：%5\n代数：%6\n生平简介：%7")
-        .arg(member->memberId)
-        .arg(member->name)
-        .arg(genderText(member->gender))
-        .arg(member->birthYear)
-        .arg(member->deathYear)
-        .arg(member->generation)
-        .arg(member->biography));
+    QMessageBox::information(this, "成员详情", memberDetailText(*member));
 }
 
 void MainWindow::addParentChildRelation() {
     if (currentGenealogyId() == 0) {
         QMessageBox::warning(this, "添加失败", "请先选择族谱。");
+        return;
+    }
+    if (!ensureCanEditCurrentData("添加亲子关系")) {
         return;
     }
 
@@ -605,6 +809,9 @@ void MainWindow::addParentChildRelation() {
 void MainWindow::addMarriageRelation() {
     if (currentGenealogyId() == 0) {
         QMessageBox::warning(this, "添加失败", "请先选择族谱。");
+        return;
+    }
+    if (!ensureCanEditCurrentData("添加婚姻关系")) {
         return;
     }
 
@@ -646,7 +853,7 @@ void MainWindow::addMarriageRelation() {
 }
 
 void MainWindow::buildTreePreview() {
-    treeWidget_->clear();
+    descendantTreeScene_->clear();
     QString error;
     int rootId = 0;
     if (!parsePositiveInt(treeRootEdit_, "根成员 ID", rootId, error)) {
@@ -667,10 +874,12 @@ void MainWindow::buildTreePreview() {
         return;
     }
 
-    auto* rootItem = new QTreeWidgetItem(QStringList(root->name + QString(" ID:%1").arg(root->memberId)));
-    treeWidget_->addTopLevelItem(rootItem);
-    appendTreeChildren(rootItem, rootId, 0, maxDepth);
-    treeWidget_->expandAll();
+    const qreal treeWidth = descendantSubtreeWidth(rootId, 0, maxDepth);
+    drawDescendantNode(*root, 0.0, 20.0, 0, maxDepth);
+    descendantTreeScene_->setSceneRect(descendantTreeScene_->itemsBoundingRect().adjusted(-80, -60, 80, 80));
+    showSceneReadable(descendantTreeView_,
+                      descendantTreeScene_,
+                      QPointF(treeWidth / 2.0, 20.0 + NodeHeight / 2.0));
 }
 
 void MainWindow::queryAncestors() {
@@ -689,6 +898,7 @@ void MainWindow::queryAncestors() {
 }
 
 void MainWindow::queryRelationPath() {
+    relationPathScene_->clear();
     QString error;
     int memberA = 0;
     int memberB = 0;
@@ -705,14 +915,183 @@ void MainWindow::queryRelationPath() {
 
     if (path.empty()) {
         relationResultLabel_->setText("未找到亲缘链路。");
+        auto* text = relationPathScene_->addText("未找到两名成员之间的亲缘链路");
+        QFont font = text->font();
+        font.setPointSize(12);
+        font.setBold(true);
+        text->setFont(font);
+        text->setDefaultTextColor(QColor("#52606D"));
+        text->setPos(24.0, 24.0);
+        relationPathScene_->setSceneRect(relationPathScene_->itemsBoundingRect().adjusted(-40, -40, 40, 40));
         return;
     }
 
     QStringList parts;
+    std::vector<Member> members;
     for (int memberId : path) {
-        parts << memberLabel(memberDao_.findById(memberId), memberId);
+        const auto member = memberDao_.findById(memberId);
+        parts << memberLabel(member, memberId);
+        if (member.has_value()) {
+            members.push_back(*member);
+        }
     }
-    relationResultLabel_->setText("存在亲缘链路：\n" + parts.join(" -> "));
+    relationResultLabel_->setText(QString("存在亲缘链路，共 %1 个节点：\n%2")
+                                      .arg(path.size())
+                                      .arg(parts.join(" -> ")));
+
+    qreal left = 20.0;
+    const qreal top = 56.0;
+    for (int i = 0; i < static_cast<int>(members.size()); ++i) {
+        drawRelationPathCard(members[i],
+                             left,
+                             top,
+                             i == 0,
+                             i == static_cast<int>(members.size()) - 1);
+        if (i < static_cast<int>(members.size()) - 1) {
+            drawRelationArrow(left + RelationCardWidth + 10.0,
+                              top + RelationCardHeight / 2.0,
+                              left + RelationCardWidth + RelationGap - 10.0);
+        }
+        left += RelationCardWidth + RelationGap;
+    }
+
+    relationPathScene_->setSceneRect(relationPathScene_->itemsBoundingRect().adjusted(-40, -50, 40, 50));
+    showSceneReadable(relationPathView_,
+                      relationPathScene_,
+                      QPointF(20.0 + RelationCardWidth / 2.0, top + RelationCardHeight / 2.0));
+}
+
+void MainWindow::showDescendantNodeDetail() {
+    const auto selectedItems = descendantTreeScene_->selectedItems();
+    for (QGraphicsItem* item : selectedItems) {
+        const QVariant memberIdData = item->data(MemberIdItemDataKey);
+        if (!memberIdData.isValid()) {
+            continue;
+        }
+
+        const auto member = memberDao_.findById(memberIdData.toInt());
+        descendantTreeScene_->clearSelection();
+        if (!member.has_value()) {
+            QMessageBox::warning(this, "查看失败", "未找到该成员。");
+            return;
+        }
+        QMessageBox::information(this, "成员详情", memberDetailText(*member));
+        return;
+    }
+}
+
+QString MainWindow::currentAccessRole() const {
+    const int genealogyId = currentGenealogyId();
+    if (genealogyId == 0) {
+        return {};
+    }
+
+    const auto genealogy = genealogyDao_.findById(genealogyId);
+    if (!genealogy.has_value()) {
+        return {};
+    }
+    if (genealogy->creatorUserId == user_.userId) {
+        return "owner";
+    }
+    return genealogyDao_.roleForUser(genealogyId, user_.userId);
+}
+
+bool MainWindow::canManageCurrentGenealogy() const {
+    return currentAccessRole() == "owner";
+}
+
+bool MainWindow::canEditCurrentData() const {
+    const QString role = currentAccessRole();
+    return role == "owner" || role == "editor";
+}
+
+bool MainWindow::ensureCanManageCurrentGenealogy(const QString& actionName) const {
+    if (canManageCurrentGenealogy()) {
+        return true;
+    }
+    QMessageBox::warning(const_cast<MainWindow*>(this),
+                         "权限不足",
+                         actionName + " 需要族谱创建者权限。");
+    return false;
+}
+
+bool MainWindow::ensureCanEditCurrentData(const QString& actionName) const {
+    if (canEditCurrentData()) {
+        return true;
+    }
+    QMessageBox::warning(const_cast<MainWindow*>(this),
+                         "权限不足",
+                         actionName + " 需要创建者或编辑者权限。当前查看者只能浏览和查询。");
+    return false;
+}
+
+void MainWindow::updatePermissionUi() {
+    const QString role = currentAccessRole();
+    const bool hasGenealogy = currentGenealogyId() != 0;
+    const bool isOwner = role == "owner";
+    const bool canEditData = role == "owner" || role == "editor";
+
+    QString roleText = "权限：无族谱";
+    if (role == "owner") {
+        roleText = "权限：创建者";
+    } else if (role == "editor") {
+        roleText = "权限：编辑者";
+    } else if (role == "viewer") {
+        roleText = "权限：查看者";
+    }
+    if (roleLabel_) {
+        roleLabel_->setText(roleText);
+    }
+
+    if (dashboardAddMemberButton_) {
+        dashboardAddMemberButton_->setEnabled(hasGenealogy && canEditData);
+        dashboardAddMemberButton_->setToolTip(canEditData ? QString() : "查看者不能新增成员");
+    }
+
+    if (genealogyAddButton_) {
+        genealogyAddButton_->setEnabled(true);
+    }
+    if (genealogyEditButton_) {
+        genealogyEditButton_->setEnabled(hasGenealogy && isOwner);
+        genealogyEditButton_->setToolTip(isOwner ? QString() : "只有族谱创建者可以编辑族谱信息");
+    }
+    if (genealogyDeleteButton_) {
+        genealogyDeleteButton_->setEnabled(hasGenealogy && isOwner);
+        genealogyDeleteButton_->setToolTip(isOwner ? QString() : "只有族谱创建者可以删除族谱");
+    }
+    if (genealogyInviteButton_) {
+        genealogyInviteButton_->setEnabled(hasGenealogy && isOwner);
+        genealogyInviteButton_->setToolTip(isOwner ? QString() : "只有族谱创建者可以邀请或调整协作者");
+    }
+
+    if (memberAddButton_) {
+        memberAddButton_->setEnabled(hasGenealogy && canEditData);
+    }
+    if (memberEditButton_) {
+        memberEditButton_->setEnabled(hasGenealogy && canEditData);
+    }
+    if (memberDeleteButton_) {
+        memberDeleteButton_->setEnabled(hasGenealogy && canEditData);
+    }
+
+    const QList<QWidget*> relationEditors = {
+        parentIdEdit_,
+        childIdEdit_,
+        parentTypeCombo_,
+        addParentChildButton_,
+        spouseAEdit_,
+        spouseBEdit_,
+        marriageYearEdit_,
+        divorceYearEdit_,
+        marriageDescriptionEdit_,
+        addMarriageButton_,
+    };
+    for (QWidget* widget : relationEditors) {
+        if (widget) {
+            widget->setEnabled(hasGenealogy && canEditData);
+            widget->setToolTip(canEditData ? QString() : "查看者不能维护关系");
+        }
+    }
 }
 
 int MainWindow::currentGenealogyId() const {
@@ -726,18 +1105,159 @@ int MainWindow::selectedMemberId() const {
     return memberTable_->item(memberTable_->currentRow(), 0)->text().toInt();
 }
 
-void MainWindow::appendTreeChildren(QTreeWidgetItem* parentItem, int memberId, int depth, int maxDepth) {
+qreal MainWindow::descendantSubtreeWidth(int memberId, int depth, int maxDepth) const {
     if (depth >= maxDepth) {
-        if (!treeService_.getChildren(memberId).empty()) {
-            parentItem->addChild(new QTreeWidgetItem(QStringList("... 已达到显示层数限制")));
-        }
-        return;
+        return NodeWidth;
     }
 
-    for (const auto& child : treeService_.getChildren(memberId)) {
-        auto* item = new QTreeWidgetItem(QStringList(
-            QString("%1 ID:%2 第%3代").arg(child.name).arg(child.memberId).arg(child.generation)));
-        parentItem->addChild(item);
-        appendTreeChildren(item, child.memberId, depth + 1, maxDepth);
+    const auto children = treeService_.getChildren(memberId);
+    if (children.empty()) {
+        return NodeWidth;
     }
+
+    qreal width = 0.0;
+    for (const auto& child : children) {
+        if (width > 0.0) {
+            width += HorizontalGap;
+        }
+        width += descendantSubtreeWidth(child.memberId, depth + 1, maxDepth);
+    }
+    return std::max(NodeWidth, width);
+}
+
+qreal MainWindow::drawDescendantNode(const Member& member, qreal left, qreal top, int depth, int maxDepth) {
+    const qreal subtreeWidth = descendantSubtreeWidth(member.memberId, depth, maxDepth);
+    const qreal centerX = left + subtreeWidth / 2.0;
+    drawMemberCard(member, centerX, top);
+
+    const auto children = treeService_.getChildren(member.memberId);
+    if (children.empty()) {
+        return subtreeWidth;
+    }
+
+    const qreal childTop = top + VerticalGap;
+    if (depth >= maxDepth) {
+        drawLimitCard(centerX, childTop);
+        descendantTreeScene_->addLine(centerX,
+                                      top + NodeHeight,
+                                      centerX,
+                                      childTop,
+                                      QPen(QColor("#7A8794"), 2));
+        return subtreeWidth;
+    }
+
+    qreal childLeft = left;
+    for (const auto& child : children) {
+        const qreal childWidth = descendantSubtreeWidth(child.memberId, depth + 1, maxDepth);
+        const qreal childCenterX = childLeft + childWidth / 2.0;
+        descendantTreeScene_->addLine(centerX,
+                                      top + NodeHeight,
+                                      childCenterX,
+                                      childTop,
+                                      QPen(QColor("#7A8794"), 2));
+        drawDescendantNode(child, childLeft, childTop, depth + 1, maxDepth);
+        childLeft += childWidth + HorizontalGap;
+    }
+
+    return subtreeWidth;
+}
+
+void MainWindow::drawMemberCard(const Member& member, qreal centerX, qreal top) {
+    const QRectF rect(centerX - NodeWidth / 2.0, top, NodeWidth, NodeHeight);
+    const QColor border = member.gender == 'F' ? QColor("#C94F7C") : QColor("#2F6FAE");
+    const QColor fill = member.gender == 'F' ? QColor("#FFF1F6") : QColor("#EEF6FF");
+
+    QPainterPath path;
+    path.addRoundedRect(rect, 8, 8);
+    auto* cardItem = descendantTreeScene_->addPath(path, QPen(border, 2), QBrush(fill));
+    cardItem->setFlag(QGraphicsItem::ItemIsSelectable, true);
+    cardItem->setData(MemberIdItemDataKey, member.memberId);
+
+    auto* nameText = descendantTreeScene_->addText(member.name);
+    QFont nameFont = nameText->font();
+    nameFont.setBold(true);
+    nameFont.setPointSize(10);
+    nameText->setFont(nameFont);
+    nameText->setDefaultTextColor(QColor("#1F2933"));
+    nameText->setTextWidth(NodeWidth - 16.0);
+    nameText->setPos(rect.left() + 8.0, rect.top() + 6.0);
+    nameText->setFlag(QGraphicsItem::ItemIsSelectable, true);
+    nameText->setData(MemberIdItemDataKey, member.memberId);
+
+    auto* detailText = descendantTreeScene_->addText(
+        QString("ID:%1  %2  第%3代")
+            .arg(member.memberId)
+            .arg(genderText(member.gender))
+            .arg(member.generation == 0 ? QString("-") : QString::number(member.generation)));
+    QFont detailFont = detailText->font();
+    detailFont.setPointSize(8);
+    detailText->setFont(detailFont);
+    detailText->setDefaultTextColor(QColor("#4B5563"));
+    detailText->setTextWidth(NodeWidth - 16.0);
+    detailText->setPos(rect.left() + 8.0, rect.top() + 31.0);
+    detailText->setFlag(QGraphicsItem::ItemIsSelectable, true);
+    detailText->setData(MemberIdItemDataKey, member.memberId);
+}
+
+void MainWindow::drawLimitCard(qreal centerX, qreal top) {
+    const QRectF rect(centerX - 58.0, top, 116.0, 34.0);
+    QPainterPath path;
+    path.addRoundedRect(rect, 8, 8);
+    descendantTreeScene_->addPath(path,
+                                  QPen(QColor("#9AA5B1"), 1, Qt::DashLine),
+                                  QBrush(QColor("#F5F7FA")));
+    auto* text = descendantTreeScene_->addText("还有下级成员");
+    text->setDefaultTextColor(QColor("#52606D"));
+    text->setTextWidth(rect.width());
+    text->setPos(rect.left() + 8.0, rect.top() + 6.0);
+}
+
+void MainWindow::drawRelationPathCard(const Member& member, qreal left, qreal top, bool isStart, bool isEnd) {
+    const QRectF rect(left, top, RelationCardWidth, RelationCardHeight);
+    const QColor border = isStart ? QColor("#1D8A5A") : (isEnd ? QColor("#B45309") : QColor("#52606D"));
+    const QColor fill = isStart ? QColor("#ECFDF3") : (isEnd ? QColor("#FFF7ED") : QColor("#F8FAFC"));
+
+    QPainterPath path;
+    path.addRoundedRect(rect, 8, 8);
+    relationPathScene_->addPath(path, QPen(border, 2), QBrush(fill));
+
+    const QString badge = isStart ? "起点" : (isEnd ? "终点" : "中间成员");
+    auto* badgeText = relationPathScene_->addText(badge);
+    QFont badgeFont = badgeText->font();
+    badgeFont.setPointSize(8);
+    badgeText->setFont(badgeFont);
+    badgeText->setDefaultTextColor(border);
+    badgeText->setPos(rect.left() + 8.0, rect.top() + 5.0);
+
+    auto* nameText = relationPathScene_->addText(member.name);
+    QFont nameFont = nameText->font();
+    nameFont.setBold(true);
+    nameFont.setPointSize(10);
+    nameText->setFont(nameFont);
+    nameText->setDefaultTextColor(QColor("#1F2933"));
+    nameText->setTextWidth(RelationCardWidth - 16.0);
+    nameText->setPos(rect.left() + 8.0, rect.top() + 24.0);
+
+    auto* detailText = relationPathScene_->addText(
+        QString("ID:%1  %2  第%3代")
+            .arg(member.memberId)
+            .arg(genderText(member.gender))
+            .arg(member.generation == 0 ? QString("-") : QString::number(member.generation)));
+    QFont detailFont = detailText->font();
+    detailFont.setPointSize(8);
+    detailText->setFont(detailFont);
+    detailText->setDefaultTextColor(QColor("#4B5563"));
+    detailText->setTextWidth(RelationCardWidth - 16.0);
+    detailText->setPos(rect.left() + 8.0, rect.top() + 45.0);
+}
+
+void MainWindow::drawRelationArrow(qreal fromX, qreal y, qreal toX) {
+    const QColor color("#64748B");
+    relationPathScene_->addLine(fromX, y, toX, y, QPen(color, 2));
+
+    QPolygonF arrowHead;
+    arrowHead << QPointF(toX, y)
+              << QPointF(toX - 10.0, y - 6.0)
+              << QPointF(toX - 10.0, y + 6.0);
+    relationPathScene_->addPolygon(arrowHead, QPen(color, 2), QBrush(color));
 }
