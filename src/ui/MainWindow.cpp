@@ -38,7 +38,55 @@ constexpr qreal VerticalGap = 112.0;
 constexpr qreal RelationCardWidth = 156.0;
 constexpr qreal RelationCardHeight = 64.0;
 constexpr qreal RelationGap = 74.0;
+constexpr qreal MinReadableSceneScale = 0.72;
 constexpr int MemberIdItemDataKey = 1;
+
+void configureReadableGraphicsView(QGraphicsView* view) {
+    view->setRenderHint(QPainter::Antialiasing, true);
+    view->setDragMode(QGraphicsView::ScrollHandDrag);
+    view->setAlignment(Qt::AlignCenter);
+    view->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    view->setResizeAnchor(QGraphicsView::AnchorViewCenter);
+    view->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    view->setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+}
+
+void fitGraphicsView(QGraphicsView* view, QGraphicsScene* scene) {
+    const QRectF sceneRect = scene->sceneRect();
+    if (sceneRect.isEmpty()) {
+        return;
+    }
+    view->resetTransform();
+    view->fitInView(sceneRect, Qt::KeepAspectRatio);
+}
+
+void showSceneReadable(QGraphicsView* view, QGraphicsScene* scene, const QPointF& focusPoint) {
+    const QRectF sceneRect = scene->sceneRect();
+    if (sceneRect.isEmpty()) {
+        return;
+    }
+
+    view->resetTransform();
+    const QSize viewportSize = view->viewport()->size();
+    if (!viewportSize.isEmpty()) {
+        const qreal widthScale = (viewportSize.width() - 24.0) / sceneRect.width();
+        const qreal heightScale = (viewportSize.height() - 24.0) / sceneRect.height();
+        const qreal fitScale = std::min({1.0, widthScale, heightScale});
+        if (fitScale >= MinReadableSceneScale) {
+            view->scale(fitScale, fitScale);
+        }
+    }
+    view->centerOn(focusPoint);
+}
+
+void zoomGraphicsView(QGraphicsView* view, qreal factor) {
+    const qreal currentScale = view->transform().m11();
+    const qreal nextScale = currentScale * factor;
+    if (nextScale < 0.35 || nextScale > 2.8) {
+        return;
+    }
+    view->scale(factor, factor);
+}
 
 bool parsePositiveInt(const QLineEdit* edit, const QString& fieldName, int& value, QString& error) {
     bool ok = false;
@@ -329,19 +377,42 @@ QWidget* MainWindow::buildTreePage() {
 
     auto* buildButton = new QPushButton("生成后代树", page);
     connect(buildButton, &QPushButton::clicked, this, &MainWindow::buildTreePreview);
+    auto* zoomInButton = new QPushButton("+", page);
+    zoomInButton->setToolTip("放大树形图");
+    auto* zoomOutButton = new QPushButton("-", page);
+    zoomOutButton->setToolTip("缩小树形图");
+    auto* resetZoomButton = new QPushButton("1:1", page);
+    resetZoomButton->setToolTip("恢复节点原始大小");
+    auto* fitButton = new QPushButton("适应窗口", page);
+    fitButton->setToolTip("把整棵树缩放到当前窗口内");
 
     auto* toolbar = new QHBoxLayout();
     toolbar->addWidget(treeRootEdit_);
     toolbar->addWidget(treeDepthEdit_);
     toolbar->addWidget(buildButton);
+    toolbar->addWidget(zoomInButton);
+    toolbar->addWidget(zoomOutButton);
+    toolbar->addWidget(resetZoomButton);
+    toolbar->addWidget(fitButton);
 
     descendantTreeScene_ = new QGraphicsScene(page);
     connect(descendantTreeScene_, &QGraphicsScene::selectionChanged, this, &MainWindow::showDescendantNodeDetail);
     descendantTreeView_ = new QGraphicsView(descendantTreeScene_, page);
-    descendantTreeView_->setRenderHint(QPainter::Antialiasing, true);
-    descendantTreeView_->setDragMode(QGraphicsView::ScrollHandDrag);
-    descendantTreeView_->setAlignment(Qt::AlignCenter);
+    configureReadableGraphicsView(descendantTreeView_);
     descendantTreeView_->setMinimumHeight(420);
+    connect(zoomInButton, &QPushButton::clicked, this, [this]() {
+        zoomGraphicsView(descendantTreeView_, 1.18);
+    });
+    connect(zoomOutButton, &QPushButton::clicked, this, [this]() {
+        zoomGraphicsView(descendantTreeView_, 1.0 / 1.18);
+    });
+    connect(resetZoomButton, &QPushButton::clicked, this, [this]() {
+        descendantTreeView_->resetTransform();
+        descendantTreeView_->centerOn(descendantTreeScene_->sceneRect().center());
+    });
+    connect(fitButton, &QPushButton::clicked, this, [this]() {
+        fitGraphicsView(descendantTreeView_, descendantTreeScene_);
+    });
 
     auto* layout = new QVBoxLayout(page);
     layout->addLayout(toolbar);
@@ -386,10 +457,36 @@ QWidget* MainWindow::buildRelationPage() {
 
     relationPathScene_ = new QGraphicsScene(page);
     relationPathView_ = new QGraphicsView(relationPathScene_, page);
-    relationPathView_->setRenderHint(QPainter::Antialiasing, true);
-    relationPathView_->setDragMode(QGraphicsView::ScrollHandDrag);
+    configureReadableGraphicsView(relationPathView_);
     relationPathView_->setMinimumHeight(260);
-    relationPathView_->setAlignment(Qt::AlignCenter);
+    auto* pathZoomInButton = new QPushButton("+", page);
+    pathZoomInButton->setToolTip("放大链路图");
+    auto* pathZoomOutButton = new QPushButton("-", page);
+    pathZoomOutButton->setToolTip("缩小链路图");
+    auto* pathResetButton = new QPushButton("1:1", page);
+    pathResetButton->setToolTip("恢复节点原始大小");
+    auto* pathFitButton = new QPushButton("适应窗口", page);
+    pathFitButton->setToolTip("把整条链路缩放到当前窗口内");
+
+    auto* pathToolbar = new QHBoxLayout();
+    pathToolbar->addStretch();
+    pathToolbar->addWidget(pathZoomInButton);
+    pathToolbar->addWidget(pathZoomOutButton);
+    pathToolbar->addWidget(pathResetButton);
+    pathToolbar->addWidget(pathFitButton);
+    connect(pathZoomInButton, &QPushButton::clicked, this, [this]() {
+        zoomGraphicsView(relationPathView_, 1.18);
+    });
+    connect(pathZoomOutButton, &QPushButton::clicked, this, [this]() {
+        zoomGraphicsView(relationPathView_, 1.0 / 1.18);
+    });
+    connect(pathResetButton, &QPushButton::clicked, this, [this]() {
+        relationPathView_->resetTransform();
+        relationPathView_->centerOn(relationPathScene_->sceneRect().center());
+    });
+    connect(pathFitButton, &QPushButton::clicked, this, [this]() {
+        fitGraphicsView(relationPathView_, relationPathScene_);
+    });
 
     auto* form = new QFormLayout();
     form->addRow("成员 A", relationAEdit_);
@@ -399,6 +496,7 @@ QWidget* MainWindow::buildRelationPage() {
     layout->addLayout(form);
     layout->addWidget(queryButton);
     layout->addWidget(relationResultLabel_);
+    layout->addLayout(pathToolbar);
     layout->addWidget(relationPathView_);
     layout->addStretch();
     return page;
@@ -779,8 +877,9 @@ void MainWindow::buildTreePreview() {
     const qreal treeWidth = descendantSubtreeWidth(rootId, 0, maxDepth);
     drawDescendantNode(*root, 0.0, 20.0, 0, maxDepth);
     descendantTreeScene_->setSceneRect(descendantTreeScene_->itemsBoundingRect().adjusted(-80, -60, 80, 80));
-    descendantTreeView_->fitInView(descendantTreeScene_->sceneRect(), Qt::KeepAspectRatio);
-    descendantTreeView_->centerOn(treeWidth / 2.0, 20.0);
+    showSceneReadable(descendantTreeView_,
+                      descendantTreeScene_,
+                      QPointF(treeWidth / 2.0, 20.0 + NodeHeight / 2.0));
 }
 
 void MainWindow::queryAncestors() {
@@ -857,7 +956,9 @@ void MainWindow::queryRelationPath() {
     }
 
     relationPathScene_->setSceneRect(relationPathScene_->itemsBoundingRect().adjusted(-40, -50, 40, 50));
-    relationPathView_->fitInView(relationPathScene_->sceneRect(), Qt::KeepAspectRatio);
+    showSceneReadable(relationPathView_,
+                      relationPathScene_,
+                      QPointF(20.0 + RelationCardWidth / 2.0, top + RelationCardHeight / 2.0));
 }
 
 void MainWindow::showDescendantNodeDetail() {
