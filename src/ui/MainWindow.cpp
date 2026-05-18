@@ -30,6 +30,7 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 
+#include "db/DatabaseManager.h"
 #include "ui/GenealogyDialog.h"
 #include "ui/MemberDialog.h"
 
@@ -1157,7 +1158,7 @@ void MainWindow::queryCoreEarlierThanGenerationAverage() {
 }
 
 void MainWindow::runCoreQuery(const QString& sql, const std::function<void(QSqlQuery&)>& bindValues) {
-    QSqlQuery query;
+    QSqlQuery query(DatabaseManager::instance().database());
     query.prepare(sql);
     bindValues(query);
     if (!query.exec()) {
