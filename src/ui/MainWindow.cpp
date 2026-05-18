@@ -4,6 +4,7 @@
 
 #include <QComboBox>
 #include <QFormLayout>
+#include <QFont>
 #include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
@@ -92,6 +93,16 @@ void zoomGraphicsView(QGraphicsView* view, qreal factor) {
     view->scale(factor, factor);
 }
 
+void configureReadableTable(QTableWidget* table) {
+    table->setAlternatingRowColors(true);
+    table->setShowGrid(false);
+    table->verticalHeader()->setDefaultSectionSize(34);
+    table->verticalHeader()->setVisible(false);
+    table->horizontalHeader()->setMinimumSectionSize(88);
+    table->horizontalHeader()->setDefaultSectionSize(128);
+    table->horizontalHeader()->setFixedHeight(36);
+}
+
 bool parsePositiveInt(const QLineEdit* edit, const QString& fieldName, int& value, QString& error) {
     bool ok = false;
     value = edit->text().trimmed().toInt(&ok);
@@ -162,11 +173,43 @@ MainWindow::MainWindow(const User& user, QWidget* parent) : QMainWindow(parent),
 
 void MainWindow::buildUi() {
     setWindowTitle("寻根溯源 - 族谱管理系统");
-    resize(1100, 720);
+    resize(1280, 820);
+
+    QFont windowFont = font();
+    windowFont.setPointSize(11);
+    setFont(windowFont);
+    setStyleSheet(
+        "QMainWindow, QWidget { font-size: 11pt; color: #243447; background: #F5F7FA; }"
+        "QLabel { background: transparent; }"
+        "QListWidget { background: #223041; border: 0; padding: 10px 8px; color: #E8EEF5; }"
+        "QListWidget::item { min-height: 38px; padding: 7px 12px; border-radius: 6px; margin: 2px 0; }"
+        "QListWidget::item:hover { background: #33465E; }"
+        "QListWidget::item:selected { background: #2F80ED; color: white; font-weight: 600; }"
+        "QPushButton { min-height: 34px; padding: 6px 14px; border-radius: 6px; "
+        "              border: 1px solid #B7C2D0; background: #FFFFFF; color: #1F2937; }"
+        "QPushButton:hover { background: #EAF2FF; border-color: #2F80ED; color: #1557A6; }"
+        "QPushButton:pressed { background: #D8E8FF; }"
+        "QPushButton:disabled { background: #E5E7EB; color: #9AA5B1; border-color: #D1D5DB; }"
+        "QLineEdit, QComboBox { min-height: 34px; padding: 4px 8px; border-radius: 6px; "
+        "                       border: 1px solid #B7C2D0; background: #FFFFFF; selection-background-color: #2F80ED; }"
+        "QLineEdit:focus, QComboBox:focus { border: 1px solid #2F80ED; background: #FFFFFF; }"
+        "QComboBox::drop-down { border: 0; width: 28px; }"
+        "QGroupBox { margin-top: 16px; padding: 16px 14px 14px 14px; font-weight: 600; "
+        "            border: 1px solid #D8DEE8; border-radius: 8px; background: #FFFFFF; }"
+        "QGroupBox::title { subcontrol-origin: margin; left: 12px; padding: 0 6px; color: #1F2937; background: #F5F7FA; }"
+        "QTableWidget { background: #FFFFFF; alternate-background-color: #F8FAFC; border: 1px solid #D8DEE8; "
+        "               border-radius: 8px; selection-background-color: #DCEBFF; selection-color: #111827; }"
+        "QHeaderView::section { min-height: 34px; padding: 6px 8px; font-weight: 600; "
+        "                       background: #EEF2F7; color: #243447; border: 0; border-bottom: 1px solid #D8DEE8; }"
+        "QGraphicsView, QTreeWidget { background: #FFFFFF; border: 1px solid #D8DEE8; border-radius: 8px; }"
+        "QScrollBar:vertical { background: #F1F5F9; width: 12px; margin: 0; }"
+        "QScrollBar::handle:vertical { background: #B7C2D0; min-height: 28px; border-radius: 6px; }"
+        "QScrollBar:horizontal { background: #F1F5F9; height: 12px; margin: 0; }"
+        "QScrollBar::handle:horizontal { background: #B7C2D0; min-width: 28px; border-radius: 6px; }");
 
     navigation_ = new QListWidget(this);
     navigation_->addItems({"Dashboard", "族谱管理", "成员管理", "关系维护", "树形预览", "祖先查询", "亲缘链路", "核心查询"});
-    navigation_->setFixedWidth(160);
+    navigation_->setFixedWidth(190);
     connect(navigation_, &QListWidget::currentRowChanged, this, &MainWindow::switchPage);
 
     genealogyCombo_ = new QComboBox(this);
@@ -183,6 +226,8 @@ void MainWindow::buildUi() {
     pages_->addWidget(buildCoreQueryPage());
 
     auto* topLayout = new QHBoxLayout();
+    topLayout->setContentsMargins(0, 0, 0, 8);
+    topLayout->setSpacing(10);
     topLayout->addWidget(new QLabel("当前族谱", this));
     topLayout->addWidget(genealogyCombo_, 1);
     roleLabel_ = new QLabel(this);
@@ -190,10 +235,14 @@ void MainWindow::buildUi() {
     topLayout->addWidget(roleLabel_);
 
     auto* contentLayout = new QVBoxLayout();
+    contentLayout->setContentsMargins(14, 14, 14, 14);
+    contentLayout->setSpacing(10);
     contentLayout->addLayout(topLayout);
     contentLayout->addWidget(pages_);
 
     auto* rootLayout = new QHBoxLayout();
+    rootLayout->setContentsMargins(0, 0, 0, 0);
+    rootLayout->setSpacing(0);
     rootLayout->addWidget(navigation_);
     rootLayout->addLayout(contentLayout, 1);
 
@@ -244,6 +293,7 @@ QWidget* MainWindow::buildDashboardPage() {
     recentMembersTable_->setEditTriggers(QAbstractItemView::NoEditTriggers);
     recentMembersTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
     recentMembersTable_->setSelectionMode(QAbstractItemView::SingleSelection);
+    configureReadableTable(recentMembersTable_);
 
     auto* recentBox = new QGroupBox("最近新增成员", page);
     auto* recentLayout = new QVBoxLayout(recentBox);
@@ -320,6 +370,7 @@ QWidget* MainWindow::buildMemberPage() {
     memberTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
     memberTable_->setSelectionMode(QAbstractItemView::SingleSelection);
     memberTable_->setSortingEnabled(true);
+    configureReadableTable(memberTable_);
 
     auto* layout = new QVBoxLayout(page);
     layout->addLayout(toolbar);
@@ -545,6 +596,7 @@ QWidget* MainWindow::buildCoreQueryPage() {
     coreQueryTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
     coreQueryTable_->setSelectionMode(QAbstractItemView::SingleSelection);
     coreQueryTable_->horizontalHeader()->setStretchLastSection(true);
+    configureReadableTable(coreQueryTable_);
 
     auto* layout = new QVBoxLayout(page);
     layout->addLayout(inputLayout);
