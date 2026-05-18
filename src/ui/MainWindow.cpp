@@ -21,6 +21,9 @@
 #include <QPainterPath>
 #include <QPolygonF>
 #include <QPushButton>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QSqlRecord>
 #include <QStackedWidget>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -161,7 +164,7 @@ void MainWindow::buildUi() {
     resize(1100, 720);
 
     navigation_ = new QListWidget(this);
-    navigation_->addItems({"Dashboard", "族谱管理", "成员管理", "关系维护", "树形预览", "祖先查询", "亲缘链路"});
+    navigation_->addItems({"Dashboard", "族谱管理", "成员管理", "关系维护", "树形预览", "祖先查询", "亲缘链路", "核心查询"});
     navigation_->setFixedWidth(160);
     connect(navigation_, &QListWidget::currentRowChanged, this, &MainWindow::switchPage);
 
@@ -176,6 +179,7 @@ void MainWindow::buildUi() {
     pages_->addWidget(buildTreePage());
     pages_->addWidget(buildAncestorPage());
     pages_->addWidget(buildRelationPage());
+    pages_->addWidget(buildCoreQueryPage());
 
     auto* topLayout = new QHBoxLayout();
     topLayout->addWidget(new QLabel("当前族谱", this));
@@ -499,6 +503,53 @@ QWidget* MainWindow::buildRelationPage() {
     layout->addLayout(pathToolbar);
     layout->addWidget(relationPathView_);
     layout->addStretch();
+    return page;
+}
+
+QWidget* MainWindow::buildCoreQueryPage() {
+    auto* page = new QWidget(this);
+
+    coreMemberIdEdit_ = new QLineEdit(page);
+    coreMemberIdEdit_->setPlaceholderText("成员 ID，用于配偶/子女查询和祖先递归查询");
+
+    auto* spouseChildrenButton = new QPushButton("查询配偶及所有子女", page);
+    auto* ancestorsButton = new QPushButton("递归查询所有祖先", page);
+    auto* avgLifeButton = new QPushButton("平均寿命最长的一代", page);
+    auto* olderSingleButton = new QPushButton("50岁以上无配偶男性", page);
+    auto* earlierBirthButton = new QPushButton("早于同代平均出生年", page);
+
+    connect(spouseChildrenButton, &QPushButton::clicked, this, &MainWindow::queryCoreSpousesAndChildren);
+    connect(ancestorsButton, &QPushButton::clicked, this, &MainWindow::queryCoreAncestors);
+    connect(avgLifeButton, &QPushButton::clicked, this, &MainWindow::queryCoreAverageLifeGeneration);
+    connect(olderSingleButton, &QPushButton::clicked, this, &MainWindow::queryCoreOlderSingleMales);
+    connect(earlierBirthButton, &QPushButton::clicked, this, &MainWindow::queryCoreEarlierThanGenerationAverage);
+
+    auto* inputLayout = new QHBoxLayout();
+    inputLayout->addWidget(coreMemberIdEdit_, 1);
+    inputLayout->addWidget(spouseChildrenButton);
+    inputLayout->addWidget(ancestorsButton);
+
+    auto* statsLayout = new QHBoxLayout();
+    statsLayout->addWidget(avgLifeButton);
+    statsLayout->addWidget(olderSingleButton);
+    statsLayout->addWidget(earlierBirthButton);
+    statsLayout->addStretch();
+
+    coreQueryHintLabel_ = new QLabel("当前页面对应 sql/04_core_queries.sql 的 5 个核心 SQL。统计类查询使用当前顶部选中的族谱。", page);
+    coreQueryHintLabel_->setWordWrap(true);
+    coreQueryHintLabel_->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+    coreQueryTable_ = new QTableWidget(page);
+    coreQueryTable_->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    coreQueryTable_->setSelectionBehavior(QAbstractItemView::SelectRows);
+    coreQueryTable_->setSelectionMode(QAbstractItemView::SingleSelection);
+    coreQueryTable_->horizontalHeader()->setStretchLastSection(true);
+
+    auto* layout = new QVBoxLayout(page);
+    layout->addLayout(inputLayout);
+    layout->addLayout(statsLayout);
+    layout->addWidget(coreQueryHintLabel_);
+    layout->addWidget(coreQueryTable_, 1);
     return page;
 }
 
@@ -959,6 +1010,186 @@ void MainWindow::queryRelationPath() {
     showSceneReadable(relationPathView_,
                       relationPathScene_,
                       QPointF(20.0 + RelationCardWidth / 2.0, top + RelationCardHeight / 2.0));
+}
+
+void MainWindow::queryCoreSpousesAndChildren() {
+    QString error;
+    int memberId = 0;
+    if (!parsePositiveInt(coreMemberIdEdit_, "成员 ID", memberId, error)) {
+        QMessageBox::warning(this, "输入错误", error);
+        return;
+    }
+
+    coreQueryHintLabel_->setText("基本查询：给定成员 ID，查询其配偶及所有子女。");
+    runCoreQuery(
+        "SELECT '配偶' AS relation_type, m.member_id, m.name, m.gender, m.birth_year, "
+        "       m.death_year, m.generation, m.biography "
+        "FROM marriages mr "
+        "JOIN members m ON m.member_id = CASE "
+        "    WHEN mr.person1_id = :member_id THEN mr.person2_id "
+        "    ELSE mr.person1_id "
+        "END "
+        "WHERE mr.person1_id = :member_id OR mr.person2_id = :member_id "
+        "UNION ALL "
+        "SELECT '子女' AS relation_type, c.member_id, c.name, c.gender, c.birth_year, "
+        "       c.death_year, c.generation, c.biography "
+        "FROM parent_child_relations pcr "
+        "JOIN members c ON c.member_id = pcr.child_id "
+        "WHERE pcr.parent_id = :member_id "
+        "ORDER BY relation_type, generation NULLS LAST, birth_year NULLS LAST, member_id",
+        [memberId](QSqlQuery& query) {
+            query.bindValue(":member_id", memberId);
+        });
+}
+
+void MainWindow::queryCoreAncestors() {
+    QString error;
+    int memberId = 0;
+    if (!parsePositiveInt(coreMemberIdEdit_, "成员 ID", memberId, error)) {
+        QMessageBox::warning(this, "输入错误", error);
+        return;
+    }
+
+    coreQueryHintLabel_->setText("递归查询：使用 WITH RECURSIVE 向上追溯所有历代祖先。");
+    runCoreQuery(
+        "WITH RECURSIVE ancestors AS ("
+        "    SELECT parent_id, child_id, 1 AS depth "
+        "    FROM parent_child_relations "
+        "    WHERE child_id = :member_id "
+        "    UNION ALL "
+        "    SELECT p.parent_id, p.child_id, a.depth + 1 "
+        "    FROM parent_child_relations p "
+        "    JOIN ancestors a ON p.child_id = a.parent_id "
+        ") "
+        "SELECT a.depth, m.member_id, m.name, m.gender, m.birth_year, "
+        "       m.death_year, m.generation, m.biography "
+        "FROM ancestors a "
+        "JOIN members m ON m.member_id = a.parent_id "
+        "ORDER BY a.depth, m.birth_year NULLS LAST, m.member_id",
+        [memberId](QSqlQuery& query) {
+            query.bindValue(":member_id", memberId);
+        });
+}
+
+void MainWindow::queryCoreAverageLifeGeneration() {
+    const int genealogyId = currentGenealogyId();
+    if (genealogyId == 0) {
+        QMessageBox::warning(this, "查询失败", "请先选择族谱。");
+        return;
+    }
+
+    coreQueryHintLabel_->setText("统计分析：统计当前族谱中平均寿命最长的一代人。");
+    runCoreQuery(
+        "SELECT generation, "
+        "       ROUND(AVG(death_year - birth_year)::numeric, 2) AS avg_life, "
+        "       COUNT(*) AS sample_count "
+        "FROM members "
+        "WHERE genealogy_id = :genealogy_id "
+        "  AND birth_year IS NOT NULL "
+        "  AND death_year IS NOT NULL "
+        "  AND generation IS NOT NULL "
+        "GROUP BY generation "
+        "ORDER BY avg_life DESC "
+        "LIMIT 1",
+        [genealogyId](QSqlQuery& query) {
+            query.bindValue(":genealogy_id", genealogyId);
+        });
+}
+
+void MainWindow::queryCoreOlderSingleMales() {
+    const int genealogyId = currentGenealogyId();
+    if (genealogyId == 0) {
+        QMessageBox::warning(this, "查询失败", "请先选择族谱。");
+        return;
+    }
+
+    coreQueryHintLabel_->setText("条件查询：查询当前族谱中年龄超过 50 岁且没有配偶的男性成员。结果最多显示 100 条。");
+    runCoreQuery(
+        "SELECT m.member_id, m.name, m.gender, m.birth_year, m.death_year, "
+        "       COALESCE(m.death_year, EXTRACT(YEAR FROM CURRENT_DATE)::INT) - m.birth_year AS age, "
+        "       m.generation, m.biography "
+        "FROM members m "
+        "WHERE m.genealogy_id = :genealogy_id "
+        "  AND m.gender = 'M' "
+        "  AND m.birth_year IS NOT NULL "
+        "  AND COALESCE(m.death_year, EXTRACT(YEAR FROM CURRENT_DATE)::INT) - m.birth_year > 50 "
+        "  AND NOT EXISTS ("
+        "      SELECT 1 "
+        "      FROM marriages mr "
+        "      WHERE mr.person1_id = m.member_id OR mr.person2_id = m.member_id"
+        "  ) "
+        "ORDER BY age DESC, m.member_id "
+        "LIMIT 100",
+        [genealogyId](QSqlQuery& query) {
+            query.bindValue(":genealogy_id", genealogyId);
+        });
+}
+
+void MainWindow::queryCoreEarlierThanGenerationAverage() {
+    const int genealogyId = currentGenealogyId();
+    if (genealogyId == 0) {
+        QMessageBox::warning(this, "查询失败", "请先选择族谱。");
+        return;
+    }
+
+    coreQueryHintLabel_->setText("高级查询：找出当前族谱中出生年份早于该辈分平均出生年份的成员。结果最多显示 100 条。");
+    runCoreQuery(
+        "WITH generation_avg AS ("
+        "    SELECT generation, AVG(birth_year) AS avg_birth_year "
+        "    FROM members "
+        "    WHERE genealogy_id = :genealogy_id "
+        "      AND birth_year IS NOT NULL "
+        "      AND generation IS NOT NULL "
+        "    GROUP BY generation "
+        ") "
+        "SELECT m.member_id, m.name, m.gender, m.birth_year, m.death_year, "
+        "       m.generation, ROUND(g.avg_birth_year::numeric, 2) AS avg_birth_year, "
+        "       m.biography "
+        "FROM members m "
+        "JOIN generation_avg g ON g.generation = m.generation "
+        "WHERE m.genealogy_id = :genealogy_id "
+        "  AND m.birth_year < g.avg_birth_year "
+        "ORDER BY m.generation, m.birth_year, m.member_id "
+        "LIMIT 100",
+        [genealogyId](QSqlQuery& query) {
+            query.bindValue(":genealogy_id", genealogyId);
+        });
+}
+
+void MainWindow::runCoreQuery(const QString& sql, const std::function<void(QSqlQuery&)>& bindValues) {
+    QSqlQuery query;
+    query.prepare(sql);
+    bindValues(query);
+    if (!query.exec()) {
+        QMessageBox::warning(this, "查询失败", query.lastError().text());
+        return;
+    }
+    populateCoreQueryTable(query);
+}
+
+void MainWindow::populateCoreQueryTable(QSqlQuery& query) {
+    const QSqlRecord record = query.record();
+    coreQueryTable_->clear();
+    coreQueryTable_->setRowCount(0);
+    coreQueryTable_->setColumnCount(record.count());
+
+    QStringList headers;
+    for (int col = 0; col < record.count(); ++col) {
+        headers << record.fieldName(col);
+    }
+    coreQueryTable_->setHorizontalHeaderLabels(headers);
+
+    int row = 0;
+    while (query.next()) {
+        coreQueryTable_->insertRow(row);
+        for (int col = 0; col < record.count(); ++col) {
+            auto* item = new QTableWidgetItem(query.value(col).toString());
+            item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+            coreQueryTable_->setItem(row, col, item);
+        }
+        ++row;
+    }
+    coreQueryTable_->resizeColumnsToContents();
 }
 
 void MainWindow::showDescendantNodeDetail() {

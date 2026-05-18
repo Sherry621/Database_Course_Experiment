@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include <QMainWindow>
 
 #include "db/GenealogyDao.h"
@@ -16,6 +18,7 @@ class QLabel;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
+class QSqlQuery;
 class QStackedWidget;
 class QTableWidget;
 class QTreeWidget;
@@ -45,6 +48,11 @@ private slots:
     void queryAncestors();
     void queryRelationPath();
     void showDescendantNodeDetail();
+    void queryCoreSpousesAndChildren();
+    void queryCoreAncestors();
+    void queryCoreAverageLifeGeneration();
+    void queryCoreOlderSingleMales();
+    void queryCoreEarlierThanGenerationAverage();
 
 private:
     void buildUi();
@@ -55,8 +63,11 @@ private:
     QWidget* buildTreePage();
     QWidget* buildAncestorPage();
     QWidget* buildRelationPage();
+    QWidget* buildCoreQueryPage();
     int currentGenealogyId() const;
     int selectedMemberId() const;
+    void runCoreQuery(const QString& sql, const std::function<void(QSqlQuery&)>& bindValues);
+    void populateCoreQueryTable(QSqlQuery& query);
     qreal descendantSubtreeWidth(int memberId, int depth, int maxDepth) const;
     qreal drawDescendantNode(const Member& member, qreal left, qreal top, int depth, int maxDepth);
     void drawMemberCard(const Member& member, qreal centerX, qreal top);
@@ -115,4 +126,7 @@ private:
     QLabel* relationResultLabel_ = nullptr;
     QGraphicsView* relationPathView_ = nullptr;
     QGraphicsScene* relationPathScene_ = nullptr;
+    QLineEdit* coreMemberIdEdit_ = nullptr;
+    QLabel* coreQueryHintLabel_ = nullptr;
+    QTableWidget* coreQueryTable_ = nullptr;
 };
